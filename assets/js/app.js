@@ -1360,6 +1360,13 @@ const PROFESSIONS = () => [
 ];
 const HONORIFICS = ['', 'Prof.', 'Dr.', 'Mr.', 'Ms.', 'Mrs.', 'Ns.', 'apt.'];
 
+
+/* ---------- payment account card ---------- */
+function bankHtml() {
+  const b = SITE.fees.payment; if (!b) return '';
+  return '<div class="bank"><div class="bank__ico">' + icon('wallet') + '</div><div class="bank__b"><div class="bank__l">' + esc(t(b.label)) + '</div><div class="bank__n"><b>' + esc(b.bank) + '</b><span>' + esc(b.account) + '</span><button type="button" class="bank__copy" data-copy="' + esc(b.account) + '">' + icon('copy') + ' ' + esc(L('Copy number', 'Salin nomor')) + '</button></div><div class="bank__h">' + esc(L('Account name', 'Nama rekening')) + ': ' + esc(b.holder) + '</div><div class="bank__r">' + esc(t(b.reference)) + '</div></div></div>';
+}
+
 const REG = { step: 0, data: {}, files: {}, started: Date.now(), done: null, busy: false };
 const CAT_ALL = () => SITE.fees.presenters.concat(SITE.fees.participants);
 const isPresenter = (c) => c === 'presenter-id' || c === 'presenter-intl';
@@ -1558,7 +1565,6 @@ function bindRegistrationForm() {
     else if (bk) goStep(Math.max(0, REG.step - 1));
     else if (gt && gt.classList.contains('is-done')) goStep(Number(gt.dataset.goto));
     const cl = e.target.closest('[data-clear-draft]'); if (cl) { store.del('regdraft'); REG.data = {}; REG.files = {}; REG.step = 0; renderReg(); toast(L('Draft cleared', 'Draft dihapus')); }
-    const cp = e.target.closest('[data-copy]'); if (cp) copyText(cp.dataset.copy);
   });
   bindDropzones(host, () => REG.files, () => paintFileInfo());
   host.addEventListener('submit', async (e) => {
@@ -1666,7 +1672,8 @@ PAGES.registration = function () {
       <div class="grid grid--4">${fees.presenters.concat(fees.participants).map((f, i) => feeCard(f, i, { tag: i < 2 ? L('Presenter', 'Presenter') : L('Participant', 'Peserta') }))}</div>
       <div class="offer rv" style="margin-top:24px">${icon('gift')}<div><h4>${esc(t(fees.special.title))}</h4><p>${esc(t(fees.special.text))}</p></div></div>
       <div class="rv">${notesList(fees.notes)}</div>
-      <div class="callout rv" style="margin-top:22px"><p><b>${esc(L('How to pay', 'Cara pembayaran'))}.</b> ${esc(L('Payment instructions are sent by email with your confirmation. Presenters pay after the acceptance notification and no later than 19 October 2026. Upload your proof of payment on the My Registration page.', 'Instruksi pembayaran dikirim lewat email bersama konfirmasi. Presenter membayar setelah pemberitahuan penerimaan dan paling lambat 19 Oktober 2026. Unggah bukti pembayaran di halaman Registrasi Saya.'))}</p></div>
+      <div class="callout rv" style="margin-top:22px"><p><b>${esc(L('How to pay', 'Cara pembayaran'))}.</b> ${esc(L('Bank transfer to the account below. Payment details are also sent by email with your confirmation. Presenters pay after the acceptance notification and no later than 19 October 2026. Upload your proof of payment on the My Registration page.', 'Pembayaran melalui transfer bank ke rekening di bawah. Detailnya juga dikirim lewat email bersama konfirmasi. Presenter membayar setelah pemberitahuan penerimaan dan paling lambat 19 Oktober 2026. Unggah bukti pembayaran di halaman Registrasi Saya.'))}</p></div>
+      <div class="rv" style="margin-top:16px">${bankHtml()}</div>
     </div>
   </section>
   <section class="section" id="register">
@@ -1723,7 +1730,7 @@ function myRegHtml(r) {
     (pres ? '<span>' + esc(L('Paper', 'Naskah')) + ' ' + pill(st, lab[st] || r.status) + '</span>' : '') + '<span>' + esc(L('Payment', 'Pembayaran')) + ' ' + pill(ps, lab[ps] || r.paymentStatus) + '</span></div>' +
     '<dl class="summary">' + rows.map((x) => '<div><dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd></div>').join('') + '</dl>' +
     '<div class="regcard" style="margin-top:22px"><div class="card"><h4 style="font-size:19px;margin-bottom:6px">' + esc(L('Payment proof', 'Bukti pembayaran')) + '</h4>' +
-    (canPay ? '<p style="color:var(--ink2)">' + esc(L('Upload a screenshot or PDF of your transfer receipt.', 'Unggah tangkapan layar atau PDF bukti transfer Anda.')) + '</p>' + payFormHtml() : '<p style="color:var(--ink2);margin:0">' + esc(ps === 'waiting' ? L('We received your proof and will verify it soon.', 'Bukti Anda telah kami terima dan akan segera diverifikasi.') : ps === 'paid' || ps === 'verified' ? L('Payment confirmed. Thank you.', 'Pembayaran terkonfirmasi. Terima kasih.') : ps === 'waived' ? L('No payment is needed for your registration.', 'Registrasi Anda tidak memerlukan pembayaran.') : pres ? L('Payment opens after your paper is accepted.', 'Pembayaran dibuka setelah naskah Anda diterima.') : L('Payment status will update here.', 'Status pembayaran akan diperbarui di sini.')) + '</p>') + '</div>' +
+    (canPay ? '<p style="color:var(--ink2)">' + esc(L('Upload a screenshot or PDF of your transfer receipt.', 'Unggah tangkapan layar atau PDF bukti transfer Anda.')) + '</p>' + bankHtml() + payFormHtml() : '<p style="color:var(--ink2);margin:0">' + esc(ps === 'waiting' ? L('We received your proof and will verify it soon.', 'Bukti Anda telah kami terima dan akan segera diverifikasi.') : ps === 'paid' || ps === 'verified' ? L('Payment confirmed. Thank you.', 'Pembayaran terkonfirmasi. Terima kasih.') : ps === 'waived' ? L('No payment is needed for your registration.', 'Registrasi Anda tidak memerlukan pembayaran.') : pres ? L('Payment opens after your paper is accepted.', 'Pembayaran dibuka setelah naskah Anda diterima.') : L('Payment status will update here.', 'Status pembayaran akan diperbarui di sini.')) + '</p>') + '</div>' +
     '<div class="card"><h4 style="font-size:19px;margin-bottom:6px">' + esc(L('Next steps', 'Langkah berikutnya')) + '</h4><div style="display:grid;gap:10px">' + (pres ? ojsBtn(L('Submit or manage paper in OJS', 'Kirim atau kelola naskah di OJS'), 'btn--violet btn--sm') : '') + btn(L('Programme', 'Program'), pageUrl('programme'), 'btn--outline btn--sm', 'clock') + btn(L('Contact secretariat', 'Hubungi sekretariat'), waLink('Registration ' + r.id + ': '), 'btn--outline btn--sm', 'wa', true) + '</div></div></div>' + posterBox + '</div>';
 }
 function payFormHtml() {
@@ -2143,6 +2150,7 @@ function showFatal(err) {
     setMeta(page.title, page.desc);
     mountShell(slug, page.main);
     document.documentElement.classList.add('bicon-ready');
+    ROOT.addEventListener('click', (e) => { const c = e.target.closest('[data-copy]'); if (c) copyText(c.dataset.copy); });
     if (page.init) await page.init();
     if (location.hash && location.hash.length > 1 && !/^#poster=/.test(location.hash)) {
       const el = document.getElementById(decodeURIComponent(location.hash.slice(1)));

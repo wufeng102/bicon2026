@@ -694,3 +694,18 @@ main { display: block; }
 [hidden] { display: none !important; }
 .f label.check { font-weight: 500; display: flex; align-items: flex-start; }
 .opt .mark { margin-top: 1px; }
+
+/* payment account card */
+#bicon-root .bank { display: flex; gap: 16px; align-items: flex-start; background: linear-gradient(135deg, var(--v100), #fff); border: 1px solid var(--v200, #d9cffc); border-left: 5px solid var(--o500, #FF7A1A); border-radius: 18px; padding: 18px 20px; box-shadow: 0 6px 20px rgba(27, 11, 77, .07); }
+#bicon-root .bank__ico { flex: none; width: 44px; height: 44px; border-radius: 12px; background: var(--v600); color: #fff; display: grid; place-items: center; }
+#bicon-root .bank__ico svg { width: 22px; height: 22px; }
+#bicon-root .bank__b { min-width: 0; }
+#bicon-root .bank__l { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--v600); }
+#bicon-root .bank__n { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 6px 0; }
+#bicon-root .bank__n b { font-size: 16px; }
+#bicon-root .bank__n span { font-family: "SFMono-Regular", Menlo, Consolas, monospace; font-size: clamp(20px, 3.4vw, 26px); font-weight: 800; letter-spacing: .04em; color: var(--v800, #1B0B4D); }
+#bicon-root .bank__copy { display: inline-flex; align-items: center; gap: 6px; border: 0; cursor: pointer; background: var(--v600); color: #fff; border-radius: 10px; padding: 7px 12px; font: 700 13px var(--font-b); }
+#bicon-root .bank__copy svg { width: 14px; height: 14px; }
+#bicon-root .bank__h { font-weight: 600; word-break: break-word; }
+#bicon-root .bank__r { margin-top: 6px; font-size: 14px; color: var(--ink2); }
+@media (max-width: 520px) { #bicon-root .bank { padding: 14px; gap: 12px; } #bicon-root .bank__ico { display: none; } }

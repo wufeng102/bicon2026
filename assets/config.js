@@ -3,7 +3,7 @@
    Blogger: copy src/config.js to the repository root before running the build; it is inlined into the theme. */
 window.BICON_CONFIG = {
   // Web app URL of the Google Apps Script deployment (ends with /exec). Empty = registration shows a "not connected" notice.
-  gasUrl: '',
+  gasUrl: 'https://script.google.com/macros/s/AKfycbyI_zw9V62zWZXKBR2jwGZSaHRoz_q6Y85cWXT0r0XP4keqD5hQSfu0pzpyrqE7ORw4/exec',
 
   // Firestore (optional). Leave null to serve posters through Apps Script instead.
   // firebase: { apiKey: '...', authDomain: 'PROJECT.firebaseapp.com', projectId: 'PROJECT', appId: '...' },

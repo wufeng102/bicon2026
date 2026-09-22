@@ -314,7 +314,7 @@ function navModel() {
     ] },
     { key: 'programme', label: L('Programme', 'Program'), items: [
       { label: L('Plenary programme', 'Susunan acara pleno'), sub: L('27 October 2026, session by session', '27 Oktober 2026, sesi demi sesi'), href: pageUrl('programme'), icon: 'clock' },
-      { label: L('Keynote speakers', 'Pembicara utama'), sub: L('Five experts from four countries', 'Lima pakar dari empat negara'), href: pageUrl('speakers'), icon: 'mic' },
+      { label: L('Invited speakers', 'Pembicara undangan'), sub: L('Five experts from four countries', 'Lima pakar dari empat negara'), href: pageUrl('speakers'), icon: 'mic' },
       { label: L('Important dates and venue', 'Tanggal penting dan lokasi'), sub: L('Deadlines from submission to proceedings', 'Batas waktu dari pengiriman hingga prosiding'), href: pageUrl('important-dates'), icon: 'calendar' }
     ] },
     { key: 'cfp', label: L('Call for Papers', 'Call for Papers'), items: [
@@ -422,7 +422,7 @@ function footerHtml() {
         <div class="foot-brand">
           <div class="logos"><img src="${IMG('poltekkes-logo.png')}" alt="Kemenkes Poltekkes Bengkulu"><i></i><img src="${IMG('bicon-icon.png')}" alt="B-ICON" style="height:42px"></div>
           <h4 style="letter-spacing:.02em;text-transform:none;font-size:18px;font-family:var(--font-d)">${esc(t(M.name))}</h4>
-          <p>${esc(fmtRange(M.startDate, M.endDate))} · ${esc(L('Virtual conference (online)', 'Konferensi virtual (daring)'))}<br>${esc(t(M.themeLocal))}.</p>
+          <p>${esc(fmtRange(M.startDate, M.endDate))} · ${esc(L('Hybrid conference', 'Konferensi hibrida'))}<br>${esc(t(M.themeLocal))}.</p>
           <p style="font-size:13px;opacity:.75">${esc(L('Organised by ', 'Diselenggarakan oleh '))}${esc(t(M.organizer))}.</p>
         </div>
         <div>
@@ -430,7 +430,7 @@ function footerHtml() {
           <ul class="foot-list">
             <li><a href="${pageUrl('about')}">${esc(L('About', 'Tentang'))}</a></li>
             <li><a href="${pageUrl('programme')}">${esc(L('Programme', 'Program'))}</a></li>
-            <li><a href="${pageUrl('speakers')}">${esc(L('Keynote speakers', 'Pembicara utama'))}</a></li>
+            <li><a href="${pageUrl('speakers')}">${esc(L('Invited speakers', 'Pembicara undangan'))}</a></li>
             <li><a href="${pageUrl('important-dates')}">${esc(L('Important dates', 'Tanggal penting'))}</a></li>
             <li><a href="${pageUrl('poster-exhibition')}">${esc(L('Poster exhibition', 'Pameran poster'))}</a></li>
             <li><a href="${pageUrl('faq')}">FAQ</a></li>
@@ -458,7 +458,7 @@ function footerHtml() {
         </div>
       </div>
       <div class="foot-bottom">
-        <span>© ${esc(M.year)} UPKSDMK Bengkulu, Poltekkes Kemenkes Bengkulu. ${esc(L('All rights reserved.', 'Hak cipta dilindungi.'))}</span>
+        <span>© ${esc(M.year)} Poltekkes Kemenkes Bengkulu. ${esc(L('All rights reserved.', 'Hak cipta dilindungi.'))}</span>
         <span>${esc(L('Times shown in ', 'Waktu ditampilkan dalam '))}${esc(M.tzLabel)}</span>
       </div>
     </div>
@@ -653,6 +653,11 @@ function oneHealthSvg() {
 
 /* ---------- speakers ---------- */
 function sessionFor(id) { return SITE.schedule.find((s) => s.speaker === id); }
+function speakersEmpty() {
+  return '<div class="tba rv">' + icon('mic') + '<h3>' + esc(L('Speaker line-up coming soon', 'Daftar pembicara segera diumumkan')) +
+    '</h3><p>' + esc(L('Invitations to invited speakers are in progress. Names, affiliations and session topics will be published here as soon as they are confirmed.', 'Undangan kepada para pembicara masih dalam proses konfirmasi. Nama, afiliasi, dan topik sesi akan dipublikasikan di sini setelah dikonfirmasi.')) +
+    '</p></div>';
+}
 function speakerCard(s, opts) {
   opts = opts || {};
   const ses = sessionFor(s.id);
@@ -667,7 +672,7 @@ function speakerCard(s, opts) {
 function speakerModal(s) {
   const ses = sessionFor(s.id);
   const inner = '<div class="spm"><div class="spm__side"><img src="' + SPK(s.photo) + '" alt="' + esc(s.name) + '"><div><h3>' + esc(s.name) + '</h3><p>' + esc(s.credentials) + (s.credentials ? '<br>' : '') + esc(t(s.role)) + '<br>' + esc(s.org) + '</p><p><span class="chip chip--dark">' + icon('globe') + ' ' + esc(t(s.country)) + '</span></p></div></div>' +
-    '<div class="spm__main"><h4>' + esc(L('Keynote topic', 'Topik keynote')) + '</h4><div class="spm__topic">' + esc(t(s.topic)) + '</div>' +
+    '<div class="spm__main"><h4>' + esc(L('Session topic', 'Topik sesi')) + '</h4><div class="spm__topic">' + esc(t(s.topic)) + '</div>' +
     (ses ? '<p style="margin-top:12px"><span class="chip chip--o">' + icon('clock') + ' ' + esc(fmtRange(M.seminarDate)) + ', ' + esc(ses.time) + '–' + esc(ses.end) + ' WIB</span></p>' : '') +
     '<p style="margin-top:10px;color:var(--ink2)">' + esc(t(s.abstract)) + '</p>' +
     '<h4>' + esc(L('About the speaker', 'Tentang pembicara')) + '</h4><p style="color:var(--ink2);margin:0">' + esc(t(s.bio)) + '</p>' +
@@ -706,7 +711,7 @@ function ctaBand(title, text, actions) {
 function btn(label, href, cls, ico, ext) {
   return '<a class="btn ' + (cls || 'btn--primary') + '" href="' + esc(href) + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '>' + esc(label) + (ico === false ? '' : ' ' + icon(ico || 'arrow')) + '</a>';
 }
-function ojsBtn(label, cls) { return btn(label || L('Submit paper via OJS', 'Kirim naskah via OJS'), CFG.ojs.submitUrl, cls || 'btn--primary', 'ext', true); }
+function ojsBtn(label, cls) { return btn(label || L('View the OJS proceedings system', 'Lihat sistem prosiding OJS'), CFG.ojs.baseUrl, cls || 'btn--primary', 'ext', true); }
 
 
 /* ===== 30-pages.js ===== */
@@ -773,7 +778,7 @@ PAGES.home = function () {
   const sub = SITE.dates.find((d) => d.id === 'submission');
   const open = todayISO() <= sub.end;
   const fees = SITE.fees;
-  const keynotes = SITE.schedule.filter((s) => s.type === 'keynote');
+  const invitedTalks = SITE.schedule.filter((s) => s.type === 'invited' && speakerById(s.speaker));
   const main = html`
   <section class="hero">
     <img class="hero__flower" src="${IMG('bicon-icon.png')}" alt="">
@@ -785,7 +790,7 @@ PAGES.home = function () {
         <p class="hero__sub">${esc(HOME_SUB)}</p>
         <div class="hero__meta">
           <span class="chip">${icon('calendar')} ${esc(fmtRange(M.startDate, M.endDate))}</span>
-          <span class="chip">${icon('globe')} ${esc(L('Virtual conference (online)', 'Konferensi virtual (daring)'))}</span>
+          <span class="chip">${icon('globe')} ${esc(L('Hybrid conference', 'Konferensi hibrida'))}</span>
           <span class="chip">${icon('pin')} ${esc(L('Hybrid plenary · ', 'Pleno hibrida · ') + t(M.venue))}</span>
         </div>
         <div class="hero__cta">
@@ -799,7 +804,7 @@ PAGES.home = function () {
         <div class="hero__arch"><img src="${IMG('gedung-poltekkes.jpg')}" alt="${esc(L('Poltekkes Kemenkes Bengkulu building with its Rafflesia-inspired orange facade', 'Gedung Poltekkes Kemenkes Bengkulu dengan fasad oranye bermotif ukiran khas'))}" width="479" height="640" fetchpriority="high"></div>
         ${open ? `<div class="hero__float hero__float--a"><div class="badge-ico">${icon('upload')}</div><div>${esc(L('Call for papers is open', 'Call for papers dibuka'))}<small>${esc(L('Until ', 'Hingga ') + fmtRange(sub.end, sub.end))}</small></div></div>` : ''}
         <div class="hero__float hero__float--b"><img src="${IMG('bicon-icon.png')}" alt=""></div>
-        <div class="hero__orgs"><img src="${IMG('poltekkes-logo.png')}" alt="Kemenkes Poltekkes Bengkulu"><i></i><img src="${IMG('upksdmk-logo.png')}" alt="UPKSDMK Bengkulu"></div>
+        <div class="hero__orgs"><img src="${IMG('poltekkes-logo.png')}" alt="Kemenkes Poltekkes Bengkulu"></div>
       </div>
     </div>
   </section>
@@ -825,10 +830,10 @@ PAGES.home = function () {
   <section class="section section--tint" id="speakers">
     <div class="wrap">
       <div class="sec-head sec-head--row rv">
-        <div><div class="eyebrow">${esc(L('Keynote speakers', 'Pembicara utama'))}</div><h2 class="h2">${esc(L('Five experts, five disciplines, one conversation', 'Lima pakar, lima disiplin, satu percakapan'))}</h2></div>
+        <div><div class="eyebrow">${esc(L('Invited speakers', 'Pembicara undangan'))}</div><h2 class="h2">${esc(L(SITE.speakers.length ? 'Five experts, five disciplines, one conversation' : 'Invited speakers', SITE.speakers.length ? 'Lima pakar, lima disiplin, satu percakapan' : 'Pembicara undangan'))}</h2></div>
         ${btn(L('All speakers', 'Semua pembicara'), pageUrl('speakers'), 'btn--outline')}
       </div>
-      <div class="grid grid--spk">${SITE.speakers.map((s) => speakerCard(s))}</div>
+      ${SITE.speakers.length ? '<div class="grid grid--spk">' + SITE.speakers.map((s) => speakerCard(s)).join('') + '</div>' : speakersEmpty()}
     </div>
   </section>
 
@@ -875,7 +880,8 @@ PAGES.home = function () {
         <div><div class="eyebrow">${esc(L('Plenary seminar · ', 'Seminar pleno · ') + fmtRange(M.seminarDate))}</div><h2 class="h2">${esc(L('Programme at a glance', 'Program sekilas'))}</h2></div>
         ${btn(L('Full programme', 'Program lengkap'), pageUrl('programme'), 'btn--outline', 'arrow')}
       </div>
-      <div class="grid grid--2">${keynotes.map((k, i) => { const s = speakerById(k.speaker); return `<button type="button" class="card card--lift rv" data-speaker="${esc(s.id)}" data-d="${i % 2}" style="display:flex;gap:16px;align-items:center;text-align:left;padding:18px"><img class="prog__av" src="${SPK(s.photo)}" alt="" width="64" height="64" loading="lazy"><span><span class="spk__n">${esc(k.time)}–${esc(k.end)} WIB · ${esc(t(s.field))}</span><span style="display:block;font-family:var(--font-d);font-weight:700;font-size:18px;line-height:1.25;margin:4px 0">${esc(t(s.topic))}</span><span style="color:var(--muted);font-size:14px">${esc(s.name)}</span></span></button>`; })}</div>
+      ${invitedTalks.length ? '' : speakersEmpty()}
+      <div class="grid grid--2">${invitedTalks.map((k, i) => { const s = speakerById(k.speaker); return `<button type="button" class="card card--lift rv" data-speaker="${esc(s.id)}" data-d="${i % 2}" style="display:flex;gap:16px;align-items:center;text-align:left;padding:18px"><img class="prog__av" src="${SPK(s.photo)}" alt="" width="64" height="64" loading="lazy"><span><span class="spk__n">${esc(k.time)}–${esc(k.end)} WIB · ${esc(t(s.field))}</span><span style="display:block;font-family:var(--font-d);font-weight:700;font-size:18px;line-height:1.25;margin:4px 0">${esc(t(s.topic))}</span><span style="color:var(--muted);font-size:14px">${esc(s.name)}</span></span></button>`; })}</div>
     </div>
   </section>
 
@@ -916,7 +922,7 @@ PAGES.home = function () {
             <li>${icon('wa')}<span><a href="${waLink()}" target="_blank" rel="noopener">${esc(M.contact.whatsappLabel)}</a> (WhatsApp)</span></li>
             <li>${icon('mail')}<span><a href="mailto:${esc(M.contact.email)}">${esc(M.contact.email)}</a></span></li>
           </ul>
-          <div class="partners">${`<div class="partner"><img src="${IMG('poltekkes-logo.png')}" alt="Kemenkes Poltekkes Bengkulu" style="max-height:44px"></div><div class="partner"><img src="${IMG('upksdmk-logo.png')}" alt="UPKSDMK Bengkulu"><span>UPKSDMK Bengkulu</span></div>`}</div>
+          <div class="partners">${`<div class="partner"><img src="${IMG('poltekkes-logo.png')}" alt="Kemenkes Poltekkes Bengkulu" style="max-height:44px"><span>Poltekkes Kemenkes Bengkulu</span></div>`}</div>
         </div>
         <div class="rv" data-d="2"><div class="map"><iframe title="${esc(L('Map of Poltekkes Kemenkes Bengkulu', 'Peta Poltekkes Kemenkes Bengkulu'))}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=${encodeURIComponent(M.mapQuery)}&output=embed"></iframe></div></div>
       </div>
@@ -988,8 +994,8 @@ PAGES.about = function () {
     <div class="wrap">
       ${secHead(L('Organiser', 'Penyelenggara'), t(M.organizer))}
       <div class="card rv" style="display:flex;gap:28px;align-items:center;flex-wrap:wrap">
-        <div style="display:flex;gap:22px;align-items:center;flex-wrap:wrap"><img src="${IMG('poltekkes-logo.png')}" alt="Kemenkes Poltekkes Bengkulu" style="height:58px;width:auto"><img src="${IMG('upksdmk-logo.png')}" alt="UPKSDMK Bengkulu" style="height:78px;width:auto"></div>
-        <div style="flex:1;min-width:260px"><p style="margin:0 0 6px;font-weight:700">${esc(M.address)}</p><p style="margin:0;color:var(--muted);font-size:14.5px">${esc(t(M.accreditation))}</p><p style="margin:8px 0 0"><a href="${esc(M.orgWebsite)}" target="_blank" rel="noopener">${esc(M.orgWebsite.replace('https://', ''))} ${icon('ext')}</a></p></div>
+        <div style="display:flex;gap:22px;align-items:center;flex-wrap:wrap"><img src="${IMG('poltekkes-logo.png')}" alt="Kemenkes Poltekkes Bengkulu" style="height:58px;width:auto"></div>
+        <div style="flex:1;min-width:260px"><p style="margin:0 0 6px;font-weight:700">${esc(M.address)}</p><p style="margin:8px 0 0"><a href="${esc(M.orgWebsite)}" target="_blank" rel="noopener">${esc(M.orgWebsite.replace('https://', ''))} ${icon('ext')}</a></p></div>
       </div>
     </div>
   </section>
@@ -1005,12 +1011,13 @@ PAGES.programme = function () {
   const rows = SITE.schedule.map((s, i) => {
     const sp = s.speaker ? speakerById(s.speaker) : null;
     const dur = minutes(s.end) - minutes(s.time);
-    const badge = { keynote: ['chip--o', L('Keynote', 'Keynote')], panel: ['', L('Panel', 'Panel')], break: ['chip--line', L('Break', 'Istirahat')], registration: ['chip--line', L('Check-in', 'Registrasi')], opening: ['chip--line', L('Opening', 'Pembukaan')], closing: ['chip--line', L('Closing', 'Penutup')] }[s.type];
+    const badge = { invited: ['chip--o', L('Invited speaker', 'Pembicara undangan')], panel: ['', L('Panel', 'Panel')], break: ['chip--line', L('Break', 'Istirahat')], registration: ['chip--line', L('Check-in', 'Registrasi')], opening: ['chip--line', L('Opening', 'Pembukaan')], closing: ['chip--line', L('Closing', 'Penutup')] }[s.type];
     let body;
     if (sp) {
       body = '<img class="prog__av" src="' + SPK(sp.photo) + '" alt="" width="64" height="64" loading="lazy"><div class="prog__body"><div class="spk__n" style="margin-bottom:2px">' + esc(t(s.title)) + '</div><div class="prog__ttl">' + esc(t(sp.topic)) + '</div><div class="prog__meta"><b>' + esc(sp.name) + '</b> · ' + esc(sp.org) + '</div></div>';
     } else {
-      const pan = s.panelists ? '<div class="prog__meta">' + esc(L('Moderator and ', 'Moderator dan ')) + s.panelists.map((id) => speakerById(id).name).map(esc).join(', ') + '</div>' : '';
+      const panNames = (s.panelists || []).map((id) => speakerById(id)).filter(Boolean).map((x) => x.name);
+      const pan = panNames.length ? '<div class="prog__meta">' + esc(L('Moderator and ', 'Moderator dan ')) + panNames.map(esc).join(', ') + '</div>' : '';
       body = '<div class="prog__body"><div class="prog__ttl">' + esc(t(s.title)) + '</div>' + (s.desc ? '<div class="prog__topic">' + esc(t(s.desc)) + '</div>' : '') + pan + '</div>';
     }
     const tag = sp ? 'button type="button" data-speaker="' + esc(sp.id) + '" style="text-align:left;width:100%;font:inherit;color:inherit"' : 'div';
@@ -1027,7 +1034,7 @@ PAGES.programme = function () {
         <div class="card"><div class="eyebrow">${esc(L('Where', 'Tempat'))}</div><b style="font-size:19px">${esc(t(M.venue))}</b><div class="tl__n">${esc(L('and online for remote participants', 'dan daring bagi peserta jarak jauh'))}</div></div>
       </div>
       <div class="prog">${rows}</div>
-      <div class="callout callout--o rv" style="margin-top:34px"><p><b>${esc(L('Oral and poster presentations', 'Presentasi oral dan poster'))}</b> ${esc(L('run online from 27 to 29 October 2026. The presenter schedule is announced after acceptance notifications on 16 October 2026.', 'berlangsung daring pada 27 sampai 29 Oktober 2026. Jadwal presenter diumumkan setelah pemberitahuan penerimaan pada 16 Oktober 2026.'))}</p></div>
+      <div class="callout callout--o rv" style="margin-top:34px"><p><b>${esc(L('Oral and poster presentations', 'Presentasi oral dan poster'))}</b> ${esc(L('run online on 28 October 2026. The best presenter announcement follows on 29 October 2026. The presenter schedule is announced after acceptance notifications on 17 October 2026.', 'berlangsung daring pada 28 Oktober 2026. Pengumuman best presenter menyusul pada 29 Oktober 2026. Jadwal presenter diumumkan setelah pemberitahuan penerimaan pada 17 Oktober 2026.'))}</p></div>
     </div>
   </section>${extraBlock()}`;
   return { title: L('Programme', 'Program'), desc: L('Plenary programme of B-ICON 2026 on 27 October 2026.', 'Susunan acara pleno B-ICON 2026 pada 27 Oktober 2026.'), main, init() { bindSpeakerCards(); } };
@@ -1038,14 +1045,13 @@ PAGES.programme = function () {
    ========================================================================== */
 PAGES.speakers = function () {
   const main = html`
-  ${pageHero({ title: L('Keynote speakers', 'Pembicara utama'), lead: L('Five experts from Singapore, Indonesia, Malaysia, Thailand and the United Kingdom, each speaking to one pillar of the One Health response.', 'Lima pakar dari Singapura, Indonesia, Malaysia, Thailand, dan Inggris Raya, masing-masing membahas satu pilar respons One Health.'), parent: [L('Programme', 'Program'), pageUrl('programme')] })}
+  ${pageHero({ title: L('Invited speakers', 'Pembicara undangan'), lead: SITE.speakers.length ? L('Five experts from Singapore, Indonesia, Malaysia, Thailand and the United Kingdom, each speaking to one pillar of the One Health response.', 'Lima pakar dari Singapura, Indonesia, Malaysia, Thailand, dan Inggris Raya, masing-masing membahas satu pilar respons One Health.') : L('Invitations are being finalised. The confirmed line-up will appear here.', 'Undangan sedang difinalisasi. Daftar pembicara yang telah dikonfirmasi akan tampil di sini.'), parent: [L('Programme', 'Program'), pageUrl('programme')] })}
   <section class="section">
     <div class="wrap">
-      <div class="grid grid--3">${SITE.speakers.map((s) => speakerCard(s))}</div>
-      <div class="callout rv" style="margin-top:34px"><p>${esc(L('Select a speaker to read the full profile and session abstract.', 'Pilih pembicara untuk membaca profil lengkap dan abstrak sesi.'))}</p></div>
+      ${SITE.speakers.length ? '<div class="grid grid--3">' + SITE.speakers.map((s) => speakerCard(s)).join('') + '</div><div class="callout rv" style="margin-top:34px"><p>' + esc(L('Select a speaker to read the full profile and session abstract.', 'Pilih pembicara untuk membaca profil lengkap dan abstrak sesi.')) + '</p></div>' : speakersEmpty()}
     </div>
   </section>${extraBlock()}`;
-  return { title: L('Keynote speakers', 'Pembicara utama'), desc: L('Meet the five keynote speakers of B-ICON 2026.', 'Kenali lima pembicara utama B-ICON 2026.'), main, init() { bindSpeakerCards(); } };
+  return { title: L('Invited speakers', 'Pembicara undangan'), desc: L('Meet the five invited speakers of B-ICON 2026.', 'Kenali lima pembicara undangan B-ICON 2026.'), main, init() { bindSpeakerCards(); } };
 };
 
 /* ==========================================================================
@@ -1064,7 +1070,7 @@ PAGES['important-dates'] = function () {
     <div class="wrap">
       ${secHead(L('Venue and format', 'Lokasi dan format'), L('Online for presenters, hybrid for the plenary seminar', 'Daring untuk presenter, hibrida untuk seminar pleno'))}
       <div class="grid grid--2">
-        <div class="card feat rv"><div class="feat__ico">${icon('globe')}</div><div><h4>${esc(L('Virtual conference', 'Konferensi virtual'))}</h4><p>${esc(L('All oral and poster presentations are conducted online from 27 to 29 October 2026. Access details are shared with registered participants by the committee.', 'Seluruh presentasi oral dan poster dilaksanakan daring pada 27 sampai 29 Oktober 2026. Detail akses dibagikan panitia kepada peserta terdaftar.'))}</p></div></div>
+        <div class="card feat rv"><div class="feat__ico">${icon('globe')}</div><div><h4>${esc(L('Hybrid conference', 'Konferensi hibrida'))}</h4><p>${esc(L('All oral and poster presentations are conducted online on 28 October 2026. The best presenter announcement follows on 29 October 2026. Access details are shared with registered participants by the committee.', 'Seluruh presentasi oral dan poster dilaksanakan daring pada 28 Oktober 2026. Pengumuman best presenter menyusul pada 29 Oktober 2026. Detail akses dibagikan panitia kepada peserta terdaftar.'))}</p></div></div>
         <div class="card feat rv" data-d="1"><div class="feat__ico">${icon('building')}</div><div><h4>${esc(t(M.venue))}</h4><p>${esc(L('The plenary seminar on 27 October is hybrid, with an onsite audience. ', 'Seminar pleno 27 Oktober berformat hibrida dengan peserta luring. '))}${esc(M.address)}</p></div></div>
       </div>
       <div class="rv" style="margin-top:26px"><div class="map"><iframe title="${esc(L('Map', 'Peta'))}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=${encodeURIComponent(M.mapQuery)}&output=embed"></iframe></div></div>
@@ -1102,7 +1108,7 @@ PAGES['call-for-papers'] = function () {
       <div class="rv">
         <div class="eyebrow">${esc(L('Theme', 'Tema'))}</div>
         <h2 class="h2">${esc(t(M.theme))}</h2>
-        <p class="lead" style="margin:18px 0 22px">${esc(L('Full paper submission runs from ', 'Pengiriman naskah lengkap berlangsung ') + fmtRange(sub.start, sub.end) + L('. Review takes place from 5 to 15 October and acceptance is announced on 16 October 2026.', '. Review berlangsung 5 sampai 15 Oktober dan penerimaan diumumkan pada 16 Oktober 2026.'))}</p>
+        <p class="lead" style="margin:18px 0 22px">${esc(L('Full paper submission runs from ', 'Pengiriman naskah lengkap berlangsung ') + fmtRange(sub.start, sub.end) + L(', and acceptance is announced on 17 October 2026.', ', dan penerimaan diumumkan pada 17 Oktober 2026.'))}</p>
         <div class="grid grid--2" style="gap:14px">
           <div class="card feat" style="padding:20px"><div class="feat__ico" style="background:linear-gradient(135deg,var(--o500),var(--o600))">${icon('mic')}</div><div><h4>${esc(L('Oral presentation', 'Presentasi oral'))}</h4><p>${esc(L('Presented online in a scheduled session.', 'Dipresentasikan daring pada sesi terjadwal.'))}</p></div></div>
           <div class="card feat" style="padding:20px"><div class="feat__ico">${icon('board')}</div><div><h4>${esc(L('Poster presentation', 'Presentasi poster'))}</h4><p>${esc(L('Shown in the virtual poster exhibition.', 'Ditampilkan di pameran poster virtual.'))}</p></div></div>
@@ -1135,7 +1141,7 @@ PAGES['call-for-papers'] = function () {
       <div style="margin-top:24px" class="rv">${btn(L('See all dates', 'Lihat semua tanggal'), pageUrl('important-dates'), 'btn--outline', 'calendar')}</div>
     </div>
   </section>
-  <section class="section section--tight"><div class="wrap">${ctaBand(L('Ready to present?', 'Siap presentasi?'), L('Register first, then submit your full paper through the proceedings system.', 'Daftar terlebih dahulu, lalu kirim naskah lengkap Anda melalui sistem prosiding.'), btn(L('Register now', 'Daftar sekarang'), pageUrl('registration'), 'btn--primary btn--lg') + ojsBtn(L('Open OJS', 'Buka OJS'), 'btn--ghost btn--lg'))}</div></section>
+  <section class="section section--tight"><div class="wrap">${ctaBand(L('Ready to present?', 'Siap presentasi?'), L('Register and upload your manuscript in one form. No separate OJS submission is needed.', 'Registrasi dan unggah naskah Anda dalam satu formulir. Tidak perlu pengiriman OJS terpisah.'), btn(L('Register now', 'Daftar sekarang'), pageUrl('registration'), 'btn--primary btn--lg') + ojsBtn(L('View OJS', 'Lihat OJS'), 'btn--ghost btn--lg'))}</div></section>
   ${extraBlock()}`;
   return { title: L('Call for papers', 'Call for papers'), desc: L('Call for papers: One Health in Action. Ten tracks, oral and poster, publication up to SINTA 2.', 'Call for papers: One Health in Action. Sepuluh bidang, oral dan poster, publikasi hingga SINTA 2.'), main, init() { bindZoom(); } };
 };
@@ -1151,19 +1157,18 @@ function bindZoom() {
    ========================================================================== */
 PAGES['author-guidelines'] = function () {
   const steps = [
-    [L('Register', 'Registrasi'), L('Complete the registration form as a presenter. You receive a registration ID by email.', 'Lengkapi formulir registrasi sebagai presenter. Anda menerima ID registrasi lewat email.')],
-    [L('Submit your full paper', 'Kirim naskah lengkap'), L('Upload your manuscript through the B-ICON proceedings system (OJS) between 18 September and 9 October 2026, and select one publication option.', 'Unggah naskah melalui sistem prosiding B-ICON (OJS) antara 18 September dan 9 Oktober 2026, lalu pilih satu opsi publikasi.')],
-    [L('Peer review', 'Review sejawat'), L('Reviewers evaluate the paper from 5 to 15 October 2026 and send feedback.', 'Reviewer menilai naskah pada 5 sampai 15 Oktober 2026 dan memberikan umpan balik.')],
-    [L('Acceptance and payment', 'Penerimaan dan pembayaran'), L('Acceptance is announced on 16 October. Pay the registration fee by 19 October and upload the proof on My Registration.', 'Penerimaan diumumkan 16 Oktober. Bayar biaya registrasi paling lambat 19 Oktober dan unggah bukti di Registrasi Saya.')],
+    [L('Register and submit', 'Registrasi dan kirim naskah'), L('Complete the registration form as a presenter and upload your full manuscript in the same form. You receive a registration ID by email.', 'Lengkapi formulir registrasi sebagai presenter dan unggah naskah lengkap Anda pada formulir yang sama. Anda menerima ID registrasi lewat email.')],
+    [L('Submit your full paper', 'Kirim naskah lengkap'), L('There is no separate OJS submission step for presenters. Choose one publication option when you register, between 21 September and 10 October 2026.', 'Tidak ada langkah pengiriman OJS terpisah bagi presenter. Pilih satu opsi publikasi saat Anda registrasi, antara 21 September dan 10 Oktober 2026.')],
+    [L('Acceptance and payment', 'Penerimaan dan pembayaran'), L('The science committee reviews the paper and acceptance is announced on 17 October. Pay the registration fee by 19 October and upload the proof on My Registration.', 'Komite ilmiah mereview naskah dan penerimaan diumumkan 17 Oktober. Bayar biaya registrasi paling lambat 19 Oktober dan unggah bukti di Registrasi Saya.')],
     [L('Camera-ready materials', 'Materi final'), L('Send your final presentation slides or poster by 21 October 2026. Posters join the virtual exhibition.', 'Kirim slide presentasi atau poster final paling lambat 21 Oktober 2026. Poster masuk ke pameran virtual.')],
-    [L('Present and publish', 'Presentasi dan publikasi'), L('Present online on 27 to 29 October. Submit the revised full paper by 11 November; proceedings appear by 31 December 2026.', 'Presentasikan daring pada 27 sampai 29 Oktober. Kirim naskah revisi paling lambat 11 November; prosiding terbit paling lambat 31 Desember 2026.')]
+    [L('Present and publish', 'Presentasi dan publikasi'), L('Present online on 28 October. Submit the final full paper by 11 November; the B-ICON proceedings are published by 31 December 2026.', 'Presentasikan daring pada 28 Oktober. Kirim naskah lengkap final paling lambat 11 November; prosiding B-ICON terbit paling lambat 31 Desember 2026.')]
   ];
   const main = html`
-  ${pageHero({ title: L('Author guidelines', 'Panduan penulis'), lead: L('From registration to publication in six steps.', 'Dari registrasi hingga publikasi dalam enam langkah.'), parent: [L('Call for Papers', 'Call for Papers'), pageUrl('call-for-papers')], actions: btn(L('Register as presenter', 'Daftar sebagai presenter'), pageUrl('registration'), 'btn--primary') + ojsBtn(L('Open OJS', 'Buka OJS'), 'btn--ghost') })}
+  ${pageHero({ title: L('Author guidelines', 'Panduan penulis'), lead: L('From registration to publication in five steps.', 'Dari registrasi hingga publikasi dalam lima langkah.'), parent: [L('Call for Papers', 'Call for Papers'), pageUrl('call-for-papers')], actions: btn(L('Register as presenter', 'Daftar sebagai presenter'), pageUrl('registration'), 'btn--primary') + ojsBtn(L('Open OJS', 'Buka OJS'), 'btn--ghost') })}
   <section class="section">
     <div class="wrap">
-      ${secHead(L('How to submit', 'Cara mengirim'), L('Six steps for presenters', 'Enam langkah untuk presenter'))}
-      <div class="steps steps--6" style="margin-top:12px">${steps.map((s, i) => `<div class="step rv" data-d="${i % 3}"><h4>${esc(s[0])}</h4><p>${esc(s[1])}</p></div>`)}</div>
+      ${secHead(L('How to submit', 'Cara mengirim'), L('Five steps for presenters', 'Lima langkah untuk presenter'))}
+      <div class="steps steps--5" style="margin-top:12px">${steps.map((s, i) => `<div class="step rv" data-d="${i % 3}"><h4>${esc(s[0])}</h4><p>${esc(s[1])}</p></div>`)}</div>
     </div>
   </section>
   <section class="section section--tint">
@@ -1184,7 +1189,7 @@ PAGES['author-guidelines'] = function () {
         <div class="card" style="padding:30px"><h3 class="h3" style="margin-bottom:12px">${esc(L('Publication options', 'Pilihan publikasi'))}</h3>
           <ul class="notes" style="margin-top:0">${SITE.publications.map((p) => `<li><span class="pub__n" style="background:${p.color};width:30px;height:30px;font-size:14px;flex:none;border-radius:50%;color:#fff;display:grid;place-items:center;font-weight:800">${p.n}</span><span><b>${esc(p.name)}</b> <span class="chip" style="margin-left:4px">${esc(p.index)}</span></span></li>`)}</ul>
         </div>
-        <div class="card" style="margin-top:18px;padding:26px"><h4 style="font-size:19px;margin-bottom:8px">${esc(L('Proceedings system (OJS)', 'Sistem prosiding (OJS)'))}</h4><p style="color:var(--ink2);font-size:15px">${esc(L('Your paper is submitted, reviewed and published through the B-ICON proceedings system. Create an OJS account first if you do not have one.', 'Naskah Anda dikirim, direview, dan diterbitkan melalui sistem prosiding B-ICON. Buat akun OJS terlebih dahulu jika belum punya.'))}</p><div style="display:flex;gap:10px;flex-wrap:wrap">${ojsBtn(L('Submit via OJS', 'Kirim via OJS'), 'btn--violet btn--sm')}${btn(L('Create OJS account', 'Buat akun OJS'), CFG.ojs.registerUrl, 'btn--outline btn--sm', 'user', true)}</div></div>
+        <div class="card" style="margin-top:18px;padding:26px"><h4 style="font-size:19px;margin-bottom:8px">${esc(L('Proceedings system (OJS)', 'Sistem prosiding (OJS)'))}</h4><p style="color:var(--ink2);font-size:15px">${esc(L('You do not submit your paper to OJS yourself. After your manuscript is reviewed, revised and its fee is paid, the editorial team submits it to the B-ICON proceedings system on your behalf.', 'Anda tidak perlu mengirim naskah ke OJS sendiri. Setelah naskah Anda direview, direvisi, dan biayanya dibayar, redaksi yang akan mengirimkannya ke sistem prosiding B-ICON.'))}</p><div style="display:flex;gap:10px;flex-wrap:wrap">${ojsBtn(L('View the OJS proceedings', 'Lihat prosiding OJS'), 'btn--outline btn--sm')}</div></div>
       </div>
     </div>
   </section>
@@ -1408,49 +1413,46 @@ function stepCategory() {
 }
 function stepPersonal() {
   const pres = isPresenter(REG.data.category);
+  const wni = (REG.data.country || 'ID') === 'ID';
   return '<h3>' + esc(L('Your details', 'Data diri Anda')) + '</h3><p class="sub">' + esc(L('We use these details for your certificate and to contact you.', 'Data ini kami gunakan untuk sertifikat dan untuk menghubungi Anda.')) + '</p>' +
     '<div class="fgrid">' +
-    fld({ name: 'honorific', label: L('Title', 'Gelar depan'), type: 'select', options: HONORIFICS.map((h) => [h, h || L('None', 'Tidak ada')]) }) +
-    fld({ name: 'fullName', label: L('Full name', 'Nama lengkap'), small: L('as printed on your certificate, with degrees', 'sesuai sertifikat, beserta gelar'), req: true, ac: 'name', max: 140 }) +
-    fld({ name: 'email', label: 'Email', type: 'email', req: true, ac: 'email', max: 160, hint: L('Confirmation and payment instructions are sent here.', 'Konfirmasi dan instruksi pembayaran dikirim ke sini.') }) +
+    fld({ name: 'fullNamePlain', label: L('Presenter name (without title)', 'Nama presenter (tanpa gelar)'), req: true, ac: 'name', max: 140 }) +
+    fld({ name: 'fullNameCert', label: L('Presenter name (full, with degrees, for the certificate)', 'Nama presenter (lengkap dengan gelar, untuk sertifikat)'), small: L('printed exactly as given on your certificate', 'dicetak persis seperti yang Anda isikan pada sertifikat'), req: true, ac: 'name', max: 160 }) +
+    fld({ name: 'email', label: 'Email', type: 'email', req: true, ac: 'email', max: 160, hint: L('Use the email registered on the Kemenkes RI Pelataran Sehat platform. Confirmation and payment instructions are sent here.', 'Gunakan email yang terdaftar pada platform Pelataran Sehat Kemenkes RI. Konfirmasi dan instruksi pembayaran dikirim ke sini.') }) +
     fld({ name: 'phone', label: L('WhatsApp / phone', 'WhatsApp / telepon'), type: 'tel', req: true, ac: 'tel', inputmode: 'tel', ph: '+62 8xx xxxx xxxx', max: 24 }) +
     fld({ name: 'country', label: L('Country', 'Negara'), type: 'select', req: true, options: [['', L('Choose a country', 'Pilih negara')]].concat(countryList().map((c) => [c.code, c.name])) }) +
-    fld({ name: 'profession', label: L('Profession', 'Profesi'), type: 'select', req: true, options: [['', L('Choose one', 'Pilih salah satu')]].concat(PROFESSIONS()) }) +
+    fld({ name: 'govId', label: wni ? L('National ID number (NIK)', 'Nomor Induk Kependudukan (NIK)') : L('Passport number', 'Nomor paspor'), small: wni ? L('16 digits, for Indonesian citizens', '16 digit, untuk Warga Negara Indonesia') : L('for non-Indonesian citizens', 'untuk Warga Negara Asing'), req: true, inputmode: wni ? 'numeric' : 'text', max: 24 }) +
     fld({ name: 'affiliation', label: L('Institution / affiliation', 'Institusi / afiliasi'), req: true, full: true, max: 200, ac: 'organization' }) +
     (pres ? '<div class="f f--full"><label class="check"><input type="checkbox" name="pkbAffiliated"' + (REG.data.pkbAffiliated ? ' checked' : '') + '><span>' + esc(L('I am affiliated with Poltekkes Kemenkes Bengkulu', 'Saya berafiliasi dengan Poltekkes Kemenkes Bengkulu')) + ' <small style="color:var(--muted)">' + esc(L('(this limits the publication options in the next step)', '(ini membatasi pilihan publikasi pada langkah berikutnya)')) + '</small></span></label></div>' : '') +
+    (REG.data.category === 'presenter-intl' ? '<div class="f f--full"><label class="check"><input type="checkbox" name="claimFree"' + (REG.data.claimFree ? ' checked' : '') + '><span>' + esc(L('I am claiming one of the first 10 free registration slots for international presenters', 'Saya mengklaim salah satu dari 10 slot registrasi gratis untuk presenter internasional')) + ' <small style="color:var(--muted)">' + esc(L('(subject to the committee confirming slot availability)', '(tergantung konfirmasi ketersediaan slot dari panitia)')) + '</small></span></label></div>' : '') +
     '<div class="f f--full" id="country-note"></div></div>';
 }
 function stepPaper() {
   const aff = !!REG.data.pkbAffiliated;
   const pubs = SITE.publications.map((p) => {
     const off = p.restricted && aff;
-    return '<label class="opt' + (off ? ' is-off' : '') + '"><input type="radio" name="publication" value="' + p.n + '"' + (String(REG.data.publication) === String(p.n) ? ' checked' : '') + (off ? ' disabled' : '') + '><span class="mark"></span><span class="opt__b"><span class="opt__t">' + esc(p.name) + '</span><span class="opt__s">' + esc(p.index) + (off ? ' · ' + esc(L('not available for Poltekkes Kemenkes Bengkulu authors', 'tidak tersedia bagi penulis Poltekkes Kemenkes Bengkulu')) : '') + '</span></span></label>';
+    const tpl = p.templateUrl ? '<a href="' + esc(p.templateUrl) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + icon('download') + ' ' + esc(L('Download template', 'Unduh template')) + '</a>' : '<span class="opt__contact">' + esc(L('Contact the committee for the template', 'Hubungi panitia untuk templatenya')) + '</span>';
+    return '<label class="opt opt--pub' + (off ? ' is-off' : '') + '"><input type="radio" name="publication" value="' + p.n + '"' + (String(REG.data.publication) === String(p.n) ? ' checked' : '') + (off ? ' disabled' : '') + '><span class="mark"></span><span class="opt__b"><span class="opt__t">' + esc(p.name) + '</span><span class="opt__s">' + esc(p.index) + (off ? ' · ' + esc(L('not available for Poltekkes Kemenkes Bengkulu authors', 'tidak tersedia bagi penulis Poltekkes Kemenkes Bengkulu')) : '') + '</span>' + (off ? '' : '<span class="opt__tpl">' + tpl + '</span>') + '</span></label>';
   }).join('');
-  const modes = [['oral', L('Oral presentation', 'Presentasi oral'), L('Presented online in a scheduled session', 'Dipresentasikan daring pada sesi terjadwal')], ['poster', L('Poster presentation', 'Presentasi poster'), L('Shown in the virtual poster exhibition', 'Ditampilkan di pameran poster virtual')]];
-  const intl = REG.data.category === 'presenter-intl';
-  return '<h3>' + esc(L('Paper details', 'Data naskah')) + '</h3><p class="sub">' + esc(L('Tell us about the work you will present. You can update the abstract later when you submit your full paper in OJS.', 'Ceritakan karya yang akan Anda presentasikan. Abstrak dapat diperbarui saat Anda mengirim naskah lengkap di OJS.')) + '</p>' +
+  const modes = [['oral', L('Oral presentation', 'Presentasi oral'), L('Presented online in a scheduled session', 'Dipresentasikan daring pada sesi terjadwal')], ['poster', L('Poster presentation', 'Presentasi poster'), L('Presented online in a scheduled session and shown in the virtual poster exhibition', 'Dipresentasikan daring pada sesi terjadwal dan ditampilkan di pameran poster virtual')]];
+  return '<h3>' + esc(L('Paper details', 'Data naskah')) + '</h3><p class="sub">' + esc(L('Registration and article submission happen in this one form. Download the template for your chosen publication before you write your manuscript.', 'Registrasi dan pengiriman artikel dilakukan dalam satu formulir ini. Unduh template sesuai luaran publikasi yang Anda pilih sebelum menulis naskah.')) + '</p>' +
     '<div class="fgrid">' +
     fld({ name: 'paperTitle', label: L('Paper title', 'Judul naskah'), req: true, full: true, max: 250 }) +
-    fld({ name: 'track', label: L('Scientific track', 'Bidang ilmiah'), type: 'select', req: true, full: true, options: [['', L('Choose a track', 'Pilih bidang')]].concat(SITE.tracks.map((x) => [x.n, String(x.n).padStart(2, '0') + '. ' + (x[LANG] || x.en)])) }) +
     '<div class="f f--full" data-f="presentationMode"><span class="lbl">' + esc(L('Presentation mode', 'Bentuk presentasi')) + ' <em>*</em></span><div class="opts" style="grid-template-columns:repeat(2,1fr)">' + modes.map((m) => '<label class="opt"><input type="radio" name="presentationMode" value="' + m[0] + '"' + (REG.data.presentationMode === m[0] ? ' checked' : '') + '><span class="mark"></span><span class="opt__b"><span class="opt__t">' + esc(m[1]) + '</span><span class="opt__s">' + esc(m[2]) + '</span></span></label>').join('') + '</div><span class="err"></span></div>' +
-    '<div class="f f--full" data-f="publication"><span class="lbl">' + esc(L('Preferred publication output', 'Luaran publikasi pilihan')) + ' <em>*</em></span><div class="opts">' + pubs + '</div><span class="hint">' + esc(t(SITE.publicationNotes[2])) + '</span><span class="err"></span></div>' +
-    fld({ name: 'abstract', label: L('Abstract', 'Abstrak'), type: 'textarea', req: true, full: true, counter: true, hint: L('Between 50 and ' + CFG.limits.abstractWords + ' words.', 'Antara 50 dan ' + CFG.limits.abstractWords + ' kata.') }) +
-    fld({ name: 'keywords', label: L('Keywords', 'Kata kunci'), req: true, hint: L('3 to 5 keywords, separated by commas', '3 sampai 5 kata kunci, dipisahkan koma'), max: 200 }) +
-    fld({ name: 'ojsId', label: L('OJS submission ID', 'ID pengiriman OJS'), small: L('optional, if already submitted', 'opsional, jika sudah mengirim'), max: 40 }) +
-    fld({ name: 'coauthors', label: L('Co-authors and affiliations', 'Penulis pendamping dan afiliasi'), type: 'textarea', full: true, small: L('one per line, optional', 'satu per baris, opsional'), max: 1000 }) +
-    (CFG.features.manuscriptUpload ? dropzone('manuscript', L('Manuscript or extended abstract (optional backup copy)', 'Naskah atau abstrak panjang (salinan cadangan, opsional)'), '.pdf,.doc,.docx', CFG.limits.manuscriptMB, 'PDF, DOC, DOCX · max ' + CFG.limits.manuscriptMB + ' MB', false) : '') +
-    (intl ? '<div class="f f--full"><label class="check"><input type="checkbox" name="claimFree"' + (REG.data.claimFree ? ' checked' : '') + '><span>' + esc(L('I would like to be considered for the free registration slot for the first 10 non-Indonesian presenters who choose the B-ICON 2026 Proceedings.', 'Saya ingin dipertimbangkan untuk slot registrasi gratis bagi 10 presenter non-Indonesia pertama yang memilih Prosiding B-ICON 2026.')) + '</span></label></div>' : '') +
-    '</div><div class="alert alert--info" style="margin-top:20px">' + icon('info') + '<span>' + esc(L('This form registers you. The full paper itself is submitted, reviewed and published through the B-ICON proceedings system (OJS); you will find the button after you register.', 'Formulir ini mendaftarkan Anda. Naskah lengkap dikirim, direview, dan diterbitkan melalui sistem prosiding B-ICON (OJS); tombolnya tersedia setelah Anda mendaftar.')) + '</span></div>';
+    '<div class="f f--full" data-f="publication"><span class="lbl">' + esc(L('Preferred publication output', 'Luaran publikasi pilihan')) + ' <em>*</em></span><div class="opts opts--pub">' + pubs + '</div><span class="hint">' + esc(t(SITE.publicationNotes[2])) + '</span><span class="err"></span></div>' +
+    dropzone('manuscript', L('Full paper', 'Naskah lengkap (Full Paper)'), '.pdf,.doc,.docx', CFG.limits.manuscriptMB, 'PDF, DOC, DOCX · max ' + CFG.limits.manuscriptMB + ' MB', true) +
+    '</div><div class="alert alert--info" style="margin-top:20px">' + icon('info') + '<span>' + esc(L('The manuscript you upload here is what the science committee reviews. There is no separate submission step; the editorial team handles OJS on your behalf once your paper is accepted.', 'Naskah yang Anda unggah di sini adalah yang akan direview tim komite ilmiah. Tidak ada langkah pengiriman terpisah; redaksi yang memproses ke OJS setelah naskah Anda diterima.')) + '</span></div>';
 }
 function reviewRows() {
   const d = REG.data, cat = CAT_ALL().find((c) => c.id === d.category);
   const ctry = (countryList().find((c) => c.code === d.country) || {}).name || d.country;
-  const prof = (PROFESSIONS().find((p) => p[0] === d.profession) || [])[1] || d.profession;
-  const rows = [[L('Category', 'Kategori'), cat ? t(cat.title) + ' · ' + cat.amount : ''], [L('Name', 'Nama'), ((d.honorific ? d.honorific + ' ' : '') + (d.fullName || ''))], ['Email', d.email], [L('WhatsApp / phone', 'WhatsApp / telepon'), d.phone], [L('Country', 'Negara'), ctry], [L('Profession', 'Profesi'), prof], [L('Institution', 'Institusi'), d.affiliation]];
+  const wni = (d.country || 'ID') === 'ID';
+  const rows = [[L('Category', 'Kategori'), cat ? t(cat.title) + ' · ' + cat.amount : ''], [L('Name (without title)', 'Nama (tanpa gelar)'), d.fullNamePlain], [L('Name for certificate', 'Nama untuk sertifikat'), d.fullNameCert], ['Email', d.email], [L('WhatsApp / phone', 'WhatsApp / telepon'), d.phone], [L('Country', 'Negara'), ctry], [wni ? 'NIK' : L('Passport number', 'Nomor paspor'), d.govId], [L('Institution', 'Institusi'), d.affiliation]];
+  if (d.category === 'presenter-intl' && d.claimFree) rows.push([L('Free slot', 'Slot gratis'), L('Claimed (subject to confirmation)', 'Diklaim (menunggu konfirmasi)')]);
   if (isPresenter(d.category)) {
-    const tr = trackById(d.track), pub = SITE.publications.find((p) => String(p.n) === String(d.publication));
-    rows.push([L('Paper title', 'Judul naskah'), d.paperTitle], [L('Track', 'Bidang'), tr ? (tr[LANG] || tr.en) : ''], [L('Presentation', 'Presentasi'), d.presentationMode === 'oral' ? L('Oral', 'Oral') : L('Poster', 'Poster')], [L('Publication', 'Publikasi'), pub ? pub.name + ' (' + pub.index + ')' : ''], [L('Abstract', 'Abstrak'), wordCount(d.abstract) + ' ' + L('words', 'kata')], [L('Keywords', 'Kata kunci'), d.keywords]);
-    if (REG.files.manuscript) rows.push([L('Attachment', 'Lampiran'), REG.files.manuscript.name]);
+    const pub = SITE.publications.find((p) => String(p.n) === String(d.publication));
+    rows.push([L('Paper title', 'Judul naskah'), d.paperTitle], [L('Presentation', 'Presentasi'), d.presentationMode === 'oral' ? L('Oral', 'Oral') : L('Poster', 'Poster')], [L('Publication', 'Publikasi'), pub ? pub.name + ' (' + pub.index + ')' : '']);
+    if (REG.files.manuscript) rows.push([L('Manuscript', 'Naskah'), REG.files.manuscript.name]);
   }
   return rows.filter((r) => r[1]);
 }
@@ -1477,21 +1479,24 @@ function validateStep(name) {
   const ok = (n) => setErr(n, '');
   if (name === 'category') { d.category ? ok('category') : bad('category', L('Please choose a category.', 'Mohon pilih kategori.')); }
   if (name === 'personal') {
-    (d.fullName || '').trim().length >= 3 ? ok('fullName') : bad('fullName', L('Please enter your full name.', 'Mohon isi nama lengkap Anda.'));
+    (d.fullNamePlain || '').trim().length >= 3 ? ok('fullNamePlain') : bad('fullNamePlain', L('Please enter your name.', 'Mohon isi nama Anda.'));
+    (d.fullNameCert || '').trim().length >= 3 ? ok('fullNameCert') : bad('fullNameCert', L('Please enter your name for the certificate.', 'Mohon isi nama untuk sertifikat.'));
     /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test((d.email || '').trim()) ? ok('email') : bad('email', L('Please enter a valid email address.', 'Mohon isi alamat email yang valid.'));
     (d.phone || '').replace(/\D/g, '').length >= 8 ? ok('phone') : bad('phone', L('Please enter a valid phone number.', 'Mohon isi nomor telepon yang valid.'));
     d.country ? ok('country') : bad('country', L('Please choose your country.', 'Mohon pilih negara.'));
-    d.profession ? ok('profession') : bad('profession', L('Please choose your profession.', 'Mohon pilih profesi.'));
+    {
+      const wni = (d.country || 'ID') === 'ID';
+      const gid = (d.govId || '').trim().replace(/\s+/g, '');
+      const gidOk = wni ? /^\d{16}$/.test(gid) : gid.length >= 5;
+      gidOk ? ok('govId') : bad('govId', wni ? L('NIK must be 16 digits.', 'NIK harus 16 digit.') : L('Please enter your passport number.', 'Mohon isi nomor paspor Anda.'));
+    }
     (d.affiliation || '').trim().length >= 2 ? ok('affiliation') : bad('affiliation', L('Please enter your institution.', 'Mohon isi institusi Anda.'));
   }
   if (name === 'paper') {
     (d.paperTitle || '').trim().length >= 8 ? ok('paperTitle') : bad('paperTitle', L('Please enter the paper title.', 'Mohon isi judul naskah.'));
-    d.track ? ok('track') : bad('track', L('Please choose a track.', 'Mohon pilih bidang.'));
     d.presentationMode ? ok('presentationMode') : bad('presentationMode', L('Please choose a presentation mode.', 'Mohon pilih bentuk presentasi.'));
     d.publication ? ok('publication') : bad('publication', L('Please choose a publication output.', 'Mohon pilih luaran publikasi.'));
-    const w = wordCount(d.abstract);
-    w >= 50 && w <= CFG.limits.abstractWords ? ok('abstract') : bad('abstract', w < 50 ? L('The abstract needs at least 50 words.', 'Abstrak minimal 50 kata.') : L('The abstract is over ' + CFG.limits.abstractWords + ' words.', 'Abstrak melebihi ' + CFG.limits.abstractWords + ' kata.'));
-    (d.keywords || '').split(',').filter((x) => x.trim()).length >= 3 ? ok('keywords') : bad('keywords', L('Please give at least 3 keywords, separated by commas.', 'Mohon isi minimal 3 kata kunci, dipisahkan koma.'));
+    REG.files.manuscript ? ok('manuscript') : bad('manuscript', L('Please upload your manuscript.', 'Mohon unggah naskah Anda.'));
   }
   if (name === 'review') {
     d.c1 ? ok('c1') : bad('c1', L('Please confirm.', 'Mohon konfirmasi.'));
@@ -1500,6 +1505,12 @@ function validateStep(name) {
   }
   if (first) { const el = $('[data-f="' + first + '"]', ROOT); el && el.scrollIntoView({ block: 'center', behavior: 'smooth' }); const inp = el && $('input:not([type=radio]):not([type=checkbox]), select, textarea', el); inp && inp.focus({ preventScroll: true }); }
   return !first;
+}
+function updateGovIdLabel() {
+  const box = $('[data-f="govId"]'); if (!box) return;
+  const wni = (REG.data.country || 'ID') === 'ID';
+  const lab = $('label', box); if (lab) lab.innerHTML = esc(wni ? L('National ID number (NIK)', 'Nomor Induk Kependudukan (NIK)') : L('Passport number', 'Nomor paspor')) + ' <em>*</em> <small>' + esc(wni ? L('16 digits, for Indonesian citizens', '16 digit, untuk Warga Negara Indonesia') : L('for non-Indonesian citizens', 'untuk Warga Negara Asing')) + '</small>';
+  const inp = $('#f-govId', box); if (inp) inp.setAttribute('inputmode', wni ? 'numeric' : 'text');
 }
 function countryNote() {
   const box = $('#country-note'); if (!box) return;
@@ -1546,7 +1557,7 @@ function bindRegistrationForm() {
     const el = e.target; if (!el.name) return;
     if (el.type === 'checkbox') REG.data[el.name] = el.checked; else if (el.type !== 'radio') REG.data[el.name] = el.value;
     if (el.name === 'abstract') updateCounters();
-    if (el.name === 'country') countryNote();
+    if (el.name === 'country') { countryNote(); updateGovIdLabel(); }
     saveDraft();
   });
   host.addEventListener('change', (e) => {
@@ -1587,17 +1598,17 @@ async function submitRegistration(honey) {
   al.innerHTML = '';
   try {
     const payload = {
-      category: d.category, honorific: d.honorific || '', fullName: d.fullName.trim(), email: d.email.trim().toLowerCase(), phone: d.phone.trim(),
-      country: d.country, countryName: (countryList().find((c) => c.code === d.country) || {}).en || d.country, profession: d.profession, affiliation: d.affiliation.trim(),
-      pkbAffiliated: !!d.pkbAffiliated, consent: true, website: honey, elapsed: Date.now() - REG.started
+      category: d.category, fullNamePlain: d.fullNamePlain.trim(), fullNameCert: d.fullNameCert.trim(), email: d.email.trim().toLowerCase(), phone: d.phone.trim(),
+      country: d.country, countryName: (countryList().find((c) => c.code === d.country) || {}).en || d.country, govId: (d.govId || '').trim(), affiliation: d.affiliation.trim(),
+      pkbAffiliated: !!d.pkbAffiliated, claimFree: d.category === 'presenter-intl' && !!d.claimFree, consent: true, website: honey, elapsed: Date.now() - REG.started
     };
     if (isPresenter(d.category)) {
-      Object.assign(payload, { paperTitle: d.paperTitle.trim(), track: Number(d.track), presentationMode: d.presentationMode, publication: Number(d.publication), abstract: d.abstract.trim(), keywords: d.keywords.trim(), ojsId: (d.ojsId || '').trim(), coauthors: (d.coauthors || '').trim(), claimFree: !!d.claimFree });
+      Object.assign(payload, { paperTitle: d.paperTitle.trim(), presentationMode: d.presentationMode, publication: Number(d.publication) });
       const f = REG.files.manuscript;
       if (f) payload.file = { name: f.name, type: f.type || 'application/octet-stream', data: await fileToB64(f) };
     }
     const res = await gasPost('register', payload, { timeout: 120000 });
-    REG.done = { id: res.id, email: payload.email, presenter: isPresenter(d.category), name: payload.fullName, emailSent: res.emailSent !== false };
+    REG.done = { id: res.id, email: payload.email, presenter: isPresenter(d.category), name: payload.fullNameCert, emailSent: res.emailSent !== false };
     store.del('regdraft'); store.set('lastreg', res.id);
     showSuccess();
   } catch (err) {
@@ -1616,8 +1627,8 @@ function showSuccess() {
     '<div class="regid"><span>' + esc(r.id) + '</span><button type="button" data-copy="' + esc(r.id) + '">' + esc(L('Copy', 'Salin')) + '</button></div>' +
     '<p style="color:var(--ink2);max-width:60ch;margin:8px auto 0">' + esc(r.emailSent ? L('A confirmation email is on its way to ', 'Email konfirmasi sedang dikirim ke ') : L('We could not send the confirmation email automatically. Please keep this ID and contact the secretariat. Address: ', 'Email konfirmasi tidak dapat dikirim otomatis. Simpan ID ini dan hubungi sekretariat. Alamat: ')) + '<b>' + esc(r.email) + '</b>. ' + esc(L('Keep your ID and email, you need both to check your status and upload documents.', 'Simpan ID dan email Anda, keduanya dibutuhkan untuk mengecek status dan mengunggah dokumen.')) + '</p>' +
     '<div class="next-grid">' +
-    (r.presenter ? '<div class="card"><h4>' + esc(L('1. Submit your full paper', '1. Kirim naskah lengkap')) + '</h4><p>' + esc(L('Submit through the proceedings system (OJS) by 9 October 2026 and select your publication option.', 'Kirim melalui sistem prosiding (OJS) paling lambat 9 Oktober 2026 dan pilih opsi publikasi.')) + '</p>' + ojsBtn(L('Open OJS', 'Buka OJS'), 'btn--primary btn--sm') + '</div>' : '<div class="card"><h4>' + esc(L('1. Check your email', '1. Periksa email Anda')) + '</h4><p>' + esc(L('Payment instructions are in the confirmation email.', 'Instruksi pembayaran ada di email konfirmasi.')) + '</p></div>') +
-    '<div class="card"><h4>' + esc(r.presenter ? L('2. Wait for acceptance', '2. Tunggu pemberitahuan') : L('2. Pay the fee', '2. Bayar biaya')) + '</h4><p>' + esc(r.presenter ? L('Acceptance is announced on 16 October 2026. You then pay by 19 October.', 'Penerimaan diumumkan 16 Oktober 2026. Setelah itu bayar paling lambat 19 Oktober.') : L('Then upload your proof of payment on My Registration.', 'Lalu unggah bukti pembayaran di Registrasi Saya.')) + '</p></div>' +
+    (r.presenter ? '<div class="card"><h4>' + esc(L('1. Await review', '1. Tunggu review')) + '</h4><p>' + esc(L('Your manuscript has been received and will be sent to the science committee for peer review. There is nothing more to submit.', 'Naskah Anda telah diterima dan akan dikirim ke komite ilmiah untuk direview. Tidak ada lagi yang perlu dikirim.')) + '</p>' + '</div>' : '<div class="card"><h4>' + esc(L('1. Check your email', '1. Periksa email Anda')) + '</h4><p>' + esc(L('Payment instructions are in the confirmation email.', 'Instruksi pembayaran ada di email konfirmasi.')) + '</p></div>') +
+    '<div class="card"><h4>' + esc(r.presenter ? L('2. Wait for acceptance', '2. Tunggu pemberitahuan') : L('2. Pay the fee', '2. Bayar biaya')) + '</h4><p>' + esc(r.presenter ? L('Acceptance is announced on 17 October 2026. You then pay by 19 October.', 'Penerimaan diumumkan 17 Oktober 2026. Setelah itu bayar paling lambat 19 Oktober.') : L('Then upload your proof of payment on My Registration.', 'Lalu unggah bukti pembayaran di Registrasi Saya.')) + '</p></div>' +
     '<div class="card"><h4>' + esc(L('3. Track your registration', '3. Pantau registrasi Anda')) + '</h4><p>' + esc(L('Check status, upload payment proof and, for posters, your poster.', 'Cek status, unggah bukti bayar dan, untuk poster, unggah poster Anda.')) + '</p>' + btn(L('My registration', 'Registrasi saya'), pageUrl('my-registration') + '?id=' + encodeURIComponent(r.id), 'btn--violet btn--sm', 'arrow') + '</div></div></div>';
   window.scrollTo({ top: $('#register').getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
 }
@@ -1662,7 +1673,7 @@ PAGES.registration = function () {
         <div class="step rv"><h4>${esc(L('Choose a category', 'Pilih kategori'))}</h4><p>${esc(L('Presenter (oral or poster) or participant (online or onsite).', 'Presenter (oral atau poster) atau peserta (daring atau luring).'))}</p></div>
         <div class="step rv" data-d="1"><h4>${esc(L('Fill in your details', 'Isi data Anda'))}</h4><p>${esc(L('Personal details and, for presenters, your paper information.', 'Data diri dan, untuk presenter, informasi naskah.'))}</p></div>
         <div class="step rv" data-d="2"><h4>${esc(L('Get your ID', 'Dapatkan ID'))}</h4><p>${esc(L('A registration ID arrives on screen and by email.', 'ID registrasi tampil di layar dan dikirim lewat email.'))}</p></div>
-        <div class="step rv" data-d="3"><h4>${esc(L('Submit, pay, present', 'Kirim, bayar, presentasi'))}</h4><p>${esc(L('Submit your paper in OJS, pay after acceptance and join online.', 'Kirim naskah di OJS, bayar setelah diterima, dan bergabung secara daring.'))}</p></div>
+        <div class="step rv" data-d="3"><h4>${esc(L('Review, pay, present', 'Review, bayar, presentasi'))}</h4><p>${esc(L('Your manuscript is reviewed, pay after acceptance and join online.', 'Naskah Anda direview, bayar setelah diterima, dan bergabung secara daring.'))}</p></div>
       </div>
     </div>
   </section>
@@ -1720,18 +1731,32 @@ function myRegHtml(r) {
     pres ? [L('Paper title', 'Judul naskah'), r.paperTitle] : null, pres ? [L('Presentation', 'Presentasi'), r.presentationMode === 'oral' ? L('Oral', 'Oral') : L('Poster', 'Poster')] : null,
     pres && r.publication ? [L('Publication', 'Publikasi'), r.publication] : null, r.notes ? [L('Note from committee', 'Catatan panitia'), r.notes] : null
   ].filter(Boolean);
+  let revisionBox = '';
+  if (pres && st === 'revision') {
+    revisionBox = '<div class="card" style="margin-top:18px"><h4 style="font-size:19px;margin-bottom:6px">' + esc(L('Revised manuscript', 'Naskah revisi')) + '</h4>' +
+      (r.revisionSubmitted ? '<p style="color:var(--ink2);margin:0">' + esc(L('We received your revised manuscript. The science committee is reviewing it again.', 'Naskah revisi Anda telah kami terima. Tim komite ilmiah sedang mereview kembali.')) + '</p>' :
+        '<p style="color:var(--ink2)">' + esc(L('Upload your revised manuscript, following the committee’s notes above. If your fee is still unpaid, attach your proof of payment here too.', 'Unggah naskah revisi Anda sesuai catatan panitia di atas. Jika biaya Anda belum dibayar, sertakan juga bukti pembayaran di sini.')) + '</p>' + revisionFormHtml()) + '</div>';
+  }
   let posterBox = '';
   if (pres && r.presentationMode === 'poster') {
     const ps2 = statusKey(r.posterStatus || 'none');
     posterBox = '<div class="card" style="margin-top:18px"><h4 style="font-size:19px;margin-bottom:6px">' + esc(L('Poster', 'Poster')) + ' ' + pill(ps2 === 'published' ? 'paid' : ps2 === 'pending' ? 'review' : 'pending', lab[ps2] || r.posterStatus || lab.none) + '</h4>' +
-      (canPoster ? '<p style="color:var(--ink2)">' + esc(L('Upload your camera-ready poster (JPG, PNG or PDF). After the committee approves it, it appears in the virtual poster exhibition.', 'Unggah poster final Anda (JPG, PNG, atau PDF). Setelah disetujui panitia, poster tampil di pameran poster virtual.')) + '</p>' + posterFormHtml(r) : '<p style="color:var(--ink2);margin:0">' + esc(st === 'accepted' ? L('Poster upload is available for accepted poster presenters.', 'Unggah poster tersedia bagi presenter poster yang diterima.') : L('Poster upload opens after your paper is accepted (16 October 2026).', 'Unggah poster dibuka setelah naskah Anda diterima (16 Oktober 2026).')) + '</p>') + '</div>';
+      (canPoster ? '<p style="color:var(--ink2)">' + esc(L('Upload your camera-ready poster (JPG, PNG or PDF). After the committee approves it, it appears in the virtual poster exhibition.', 'Unggah poster final Anda (JPG, PNG, atau PDF). Setelah disetujui panitia, poster tampil di pameran poster virtual.')) + '</p>' + posterFormHtml(r) : '<p style="color:var(--ink2);margin:0">' + esc(st === 'accepted' ? L('Poster upload is available for accepted poster presenters.', 'Unggah poster tersedia bagi presenter poster yang diterima.') : L('Poster upload opens after your paper is accepted (17 October 2026).', 'Unggah poster dibuka setelah naskah Anda diterima (17 Oktober 2026).')) + '</p>') + '</div>';
   }
-  return '<div class="form-card"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px"><h3 style="margin:0;margin-right:auto">' + esc(L('Your registration', 'Registrasi Anda')) + '</h3>' +
+  const STATUS_EXPLAIN = { received: L('Received means the committee has received your article and it is waiting to be reviewed.', 'Diterima berarti artikel Anda telah diterima panitia dan menunggu untuk direview.'), review: L('Under review means the science committee and its reviewers are currently assessing your article.', 'Sedang direview berarti komite ilmiah dan reviewer sedang menilai artikel Anda.'), accepted: L('Accepted means your article has been approved for presentation at the conference.', 'Diterima (accepted) berarti artikel Anda disetujui untuk dipresentasikan di konferensi.'), revision: L('Revision requested means the committee needs changes to your article before it can be accepted.', 'Perlu revisi berarti panitia meminta perbaikan pada artikel Anda sebelum dapat diterima.'), rejected: L('Not accepted means your article was not approved to be presented as a paper at this conference.', 'Tidak diterima berarti artikel Anda tidak disetujui untuk dipresentasikan sebagai naskah di konferensi ini.') }[st];
+  return '<div class="form-card"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:6px"><h3 style="margin:0;margin-right:auto">' + esc(L('Your registration', 'Registrasi Anda')) + '</h3>' +
     (pres ? '<span>' + esc(L('Paper', 'Naskah')) + ' ' + pill(st, lab[st] || r.status) + '</span>' : '') + '<span>' + esc(L('Payment', 'Pembayaran')) + ' ' + pill(ps, lab[ps] || r.paymentStatus) + '</span></div>' +
+    (pres && STATUS_EXPLAIN ? '<p class="tl__n" style="margin:0 0 18px">' + esc(STATUS_EXPLAIN) + '</p>' : '<div style="margin-bottom:18px"></div>') +
     '<dl class="summary">' + rows.map((x) => '<div><dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd></div>').join('') + '</dl>' +
     '<div class="regcard" style="margin-top:22px"><div class="card"><h4 style="font-size:19px;margin-bottom:6px">' + esc(L('Payment proof', 'Bukti pembayaran')) + '</h4>' +
     (canPay ? '<p style="color:var(--ink2)">' + esc(L('Upload a screenshot or PDF of your transfer receipt.', 'Unggah tangkapan layar atau PDF bukti transfer Anda.')) + '</p>' + bankHtml() + payFormHtml() : '<p style="color:var(--ink2);margin:0">' + esc(ps === 'waiting' ? L('We received your proof and will verify it soon.', 'Bukti Anda telah kami terima dan akan segera diverifikasi.') : ps === 'paid' || ps === 'verified' ? L('Payment confirmed. Thank you.', 'Pembayaran terkonfirmasi. Terima kasih.') : ps === 'waived' ? L('No payment is needed for your registration.', 'Registrasi Anda tidak memerlukan pembayaran.') : pres ? L('Payment opens after your paper is accepted.', 'Pembayaran dibuka setelah naskah Anda diterima.') : L('Payment status will update here.', 'Status pembayaran akan diperbarui di sini.')) + '</p>') + '</div>' +
-    '<div class="card"><h4 style="font-size:19px;margin-bottom:6px">' + esc(L('Next steps', 'Langkah berikutnya')) + '</h4><div style="display:grid;gap:10px">' + (pres ? ojsBtn(L('Submit or manage paper in OJS', 'Kirim atau kelola naskah di OJS'), 'btn--violet btn--sm') : '') + btn(L('Programme', 'Program'), pageUrl('programme'), 'btn--outline btn--sm', 'clock') + btn(L('Contact secretariat', 'Hubungi sekretariat'), waLink('Registration ' + r.id + ': '), 'btn--outline btn--sm', 'wa', true) + '</div></div></div>' + posterBox + '</div>';
+    '<div class="card"><h4 style="font-size:19px;margin-bottom:6px">' + esc(L('Next steps', 'Langkah berikutnya')) + '</h4><div style="display:grid;gap:10px">' + (pres ? ojsBtn(L('View the OJS proceedings', 'Lihat prosiding OJS'), 'btn--violet btn--sm') : '') + btn(L('Programme', 'Program'), pageUrl('programme'), 'btn--outline btn--sm', 'clock') + btn(L('Contact secretariat', 'Hubungi sekretariat'), waLink('Registration ' + r.id + ': '), 'btn--outline btn--sm', 'wa', true) + '</div></div></div>' + revisionBox + posterBox + '</div>';
+}
+function revisionFormHtml() {
+  return '<form id="revision-form" novalidate><div class="fgrid" style="grid-template-columns:1fr">' +
+    dropzone('revisionManuscript', L('Revised manuscript', 'Naskah revisi'), '.pdf,.doc,.docx', CFG.limits.manuscriptMB, 'PDF, DOC, DOCX · max ' + CFG.limits.manuscriptMB + ' MB', true) +
+    dropzone('revisionProof', L('Proof of payment', 'Bukti pembayaran'), '.jpg,.jpeg,.png,.pdf', CFG.limits.proofMB, L('optional if already paid', 'opsional jika sudah dibayar') + ' · JPG, PNG, PDF · max ' + CFG.limits.proofMB + ' MB', false) +
+    '</div><div id="revision-alert" style="margin-top:12px"></div><button class="btn btn--primary btn--sm" type="submit" style="margin-top:14px">' + esc(L('Submit revision', 'Kirim revisi')) + ' ' + icon('upload') + '</button></form>';
 }
 function payFormHtml() {
   return '<form id="pay-form" novalidate><div class="fgrid" style="grid-template-columns:1fr">' + dropzone('proof', L('Proof of payment', 'Bukti pembayaran'), '.jpg,.jpeg,.png,.pdf', CFG.limits.proofMB, 'JPG, PNG, PDF · max ' + CFG.limits.proofMB + ' MB', true) +
@@ -1742,6 +1767,7 @@ function posterFormHtml(r) {
     '<div class="f f--full"><label for="pf-title">' + esc(L('Poster title', 'Judul poster')) + ' <em>*</em></label><input id="pf-title" name="title" type="text" maxlength="250" value="' + esc(r.paperTitle || '') + '"><span class="err"></span></div>' +
     '<div class="f f--full"><label for="pf-authors">' + esc(L('Authors', 'Penulis')) + ' <em>*</em></label><input id="pf-authors" name="authors" type="text" maxlength="400" value="' + esc(r.name || '') + '" placeholder="' + esc(L('Separate authors with semicolons', 'Pisahkan penulis dengan titik koma')) + '"><span class="err"></span></div>' +
     '<div class="f"><label for="pf-aff">' + esc(L('Affiliation', 'Afiliasi')) + ' <em>*</em></label><input id="pf-aff" name="affiliation" type="text" maxlength="250" value="' + esc(r.affiliation || '') + '"><span class="err"></span></div>' +
+    '<div class="f f--full"><label for="pf-track">' + esc(L('Scientific track', 'Bidang ilmiah')) + ' <em>*</em></label><select id="pf-track" name="track"><option value="">' + esc(L('Choose a track', 'Pilih bidang')) + '</option>' + SITE.tracks.map((x) => '<option value="' + x.n + '">' + esc(String(x.n).padStart(2, '0') + '. ' + (x[LANG] || x.en)) + '</option>').join('') + '</select><span class="err"></span></div>' +
     '<div class="f"><label for="pf-video">' + esc(L('Video link', 'Tautan video')) + ' <small>' + esc(L('optional, YouTube', 'opsional, YouTube')) + '</small></label><input id="pf-video" name="videoUrl" type="url" maxlength="300" placeholder="https://youtu.be/…"><span class="err"></span></div>' +
     '<div class="f f--full"><label for="pf-abs">' + esc(L('Short abstract', 'Abstrak singkat')) + ' <em>*</em> <small>' + esc(L('up to 300 words', 'maksimal 300 kata')) + '</small></label><textarea id="pf-abs" name="abstract" maxlength="3000">' + esc(r.abstract || '') + '</textarea><span class="err"></span></div>' +
     dropzone('poster', L('Poster file', 'Berkas poster'), '.jpg,.jpeg,.png,.pdf', CFG.limits.posterMB, 'JPG, PNG, PDF · max ' + CFG.limits.posterMB + ' MB', true) +
@@ -1810,7 +1836,7 @@ PAGES['my-registration'] = function () {
 function bindMyActions() {
   const host = $('#my-result');
   if (!host.dataset.bound) { host.dataset.bound = '1'; bindDropzones(host, () => MY.files, () => { $$('[data-dz]', host).forEach((z) => { const f = MY.files[z.dataset.dz]; const info = $('.fileinfo', z); info.hidden = !f; $('.fn', info).textContent = f ? f.name + ' · ' + humanSize(f.size) : ''; }); }); }
-  const pay = $('#pay-form', host), post = $('#poster-form', host);
+  const pay = $('#pay-form', host), post = $('#poster-form', host), rev = $('#revision-form', host);
   const report = (el, cls, msg) => { el.innerHTML = '<div class="alert alert--' + cls + '">' + icon(cls === 'ok' ? 'checkc' : 'alert') + '<span>' + esc(msg) + '</span></div>'; };
   if (pay) pay.addEventListener('submit', async (e) => {
     e.preventDefault(); const al = $('#pay-alert'), b = $('button[type=submit]', pay);
@@ -1829,6 +1855,7 @@ function bindMyActions() {
     need('title', post.title.value.trim().length >= 5, L('Enter the poster title.', 'Isi judul poster.'));
     need('authors', post.authors.value.trim().length >= 2, L('Enter the authors.', 'Isi nama penulis.'));
     need('affiliation', post.affiliation.value.trim().length >= 2, L('Enter the affiliation.', 'Isi afiliasi.'));
+    need('track', !!post.track.value, L('Please choose a track.', 'Mohon pilih bidang.'));
     need('abstract', wordCount(post.abstract.value) >= 30 && wordCount(post.abstract.value) <= 320, L('The abstract should be 30 to 300 words.', 'Abstrak sebaiknya 30 sampai 300 kata.'));
     need('consent', post.consent.checked, L('Consent is required to display the poster.', 'Persetujuan diperlukan untuk menampilkan poster.'));
     const vu = post.videoUrl.value.trim(); need('videoUrl', !vu || !!youtubeEmbed(vu), L('Use a YouTube link, or leave this empty.', 'Gunakan tautan YouTube, atau kosongkan.'));
@@ -1837,9 +1864,21 @@ function bindMyActions() {
     b.classList.add('is-loading'); al.innerHTML = '';
     try {
       const f = await shrinkImage(MY.files.poster, 2600, 0.86);
-      await gasPost('uploadPoster', { id: MY.cred.id, email: MY.cred.email, title: post.title.value.trim(), authors: post.authors.value.trim(), affiliation: post.affiliation.value.trim(), abstract: post.abstract.value.trim(), videoUrl: vu, allowDownload: post.allowDownload.checked, consent: true, file: { name: f.name, type: f.type || 'application/octet-stream', data: await fileToB64(f) } }, { timeout: 180000 });
+      await gasPost('uploadPoster', { id: MY.cred.id, email: MY.cred.email, title: post.title.value.trim(), authors: post.authors.value.trim(), affiliation: post.affiliation.value.trim(), track: Number(post.track.value), abstract: post.abstract.value.trim(), videoUrl: vu, allowDownload: post.allowDownload.checked, consent: true, file: { name: f.name, type: f.type || 'application/octet-stream', data: await fileToB64(f) } }, { timeout: 180000 });
       report(al, 'ok', L('Poster received. It will appear in the exhibition once the committee approves it.', 'Poster diterima. Poster akan tampil di pameran setelah disetujui panitia.'));
       toast(L('Poster uploaded', 'Poster terunggah'));
+    } catch (err) { report(al, 'err', err.message); } finally { b.classList.remove('is-loading'); }
+  });
+  if (rev) rev.addEventListener('submit', async (e) => {
+    e.preventDefault(); const al = $('#revision-alert'), b = $('button[type=submit]', rev);
+    if (!MY.files.revisionManuscript) { report(al, 'err', L('Please attach your revised manuscript.', 'Mohon lampirkan naskah revisi Anda.')); return; }
+    b.classList.add('is-loading');
+    try {
+      const payload = { id: MY.cred.id, email: MY.cred.email, file: { name: MY.files.revisionManuscript.name, type: MY.files.revisionManuscript.type || 'application/octet-stream', data: await fileToB64(MY.files.revisionManuscript) } };
+      if (MY.files.revisionProof) { const f = await shrinkImage(MY.files.revisionProof, 2000, 0.85); payload.proofFile = { name: f.name, type: f.type || 'application/octet-stream', data: await fileToB64(f) }; }
+      await gasPost('uploadRevision', payload, { timeout: 120000 });
+      report(al, 'ok', L('Revision received. The science committee will review it again.', 'Revisi diterima. Tim komite ilmiah akan mereview kembali.'));
+      MY.files = {}; toast(L('Revision submitted', 'Revisi terkirim'));
     } catch (err) { report(al, 'err', err.message); } finally { b.classList.remove('is-loading'); }
   });
 }
@@ -2048,7 +2087,7 @@ PAGES['poster-exhibition'] = function () {
   <section class="section section--tight"><div class="wrap">
     ${secHead(L('For presenters', 'Untuk presenter'), L('How your poster gets here', 'Bagaimana poster Anda tampil di sini'))}
     <div class="steps">
-      <div class="step rv"><h4>${esc(L('Get accepted', 'Diterima'))}</h4><p>${esc(L('Register as a poster presenter and submit your paper. Acceptance is announced on 16 October 2026.', 'Daftar sebagai presenter poster dan kirim naskah. Penerimaan diumumkan 16 Oktober 2026.'))}</p></div>
+      <div class="step rv"><h4>${esc(L('Get accepted', 'Diterima'))}</h4><p>${esc(L('Register as a poster presenter and submit your paper. Acceptance is announced on 17 October 2026.', 'Daftar sebagai presenter poster dan kirim naskah. Penerimaan diumumkan 17 Oktober 2026.'))}</p></div>
       <div class="step rv" data-d="1"><h4>${esc(L('Upload your poster', 'Unggah poster'))}</h4><p>${esc(L('Use My Registration to upload a JPG, PNG or PDF, plus an optional video link.', 'Gunakan Registrasi Saya untuk mengunggah JPG, PNG, atau PDF, serta tautan video opsional.'))}</p></div>
       <div class="step rv" data-d="2"><h4>${esc(L('Committee review', 'Ditinjau panitia'))}</h4><p>${esc(L('The committee checks the file and publishes it. You get an email when it is live.', 'Panitia memeriksa berkas lalu menerbitkannya. Anda mendapat email saat poster tayang.'))}</p></div>
       <div class="step rv" data-d="3"><h4>${esc(L('Share it', 'Bagikan'))}</h4><p>${esc(L('Every poster has its own link you can send to colleagues and reviewers.', 'Setiap poster memiliki tautan sendiri yang bisa Anda kirim ke kolega dan reviewer.'))}</p></div>
@@ -2067,7 +2106,7 @@ PAGES['poster-exhibition'] = function () {
         EX.all = await PosterStore.list();
       } catch (err) { empty(L('The exhibition could not be loaded', 'Pameran tidak dapat dimuat'), L('Please refresh the page in a moment.', 'Silakan muat ulang halaman beberapa saat lagi.')); return; }
       if (!EX.all.length) {
-        empty(L('The exhibition opens soon', 'Pameran segera dibuka'), L('Posters appear here after acceptance notifications on 16 October 2026 and committee review. Presenters can upload their poster from My Registration.', 'Poster tampil di sini setelah pemberitahuan penerimaan 16 Oktober 2026 dan peninjauan panitia. Presenter dapat mengunggah poster dari Registrasi Saya.'));
+        empty(L('The exhibition opens soon', 'Pameran segera dibuka'), L('Posters appear here after acceptance notifications on 17 October 2026 and committee review. Presenters can upload their poster from My Registration.', 'Poster tampil di sini setelah pemberitahuan penerimaan 17 Oktober 2026 dan peninjauan panitia. Presenter dapat mengunggah poster dari Registrasi Saya.'));
         $$('.tchip b', ROOT).forEach((b) => { b.textContent = '0'; });
         return;
       }

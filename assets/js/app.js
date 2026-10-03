@@ -314,7 +314,7 @@ function navModel() {
     ] },
     { key: 'programme', label: L('Programme', 'Program'), items: [
       { label: L('Plenary programme', 'Susunan acara pleno'), sub: L('27 October 2026, session by session', '27 Oktober 2026, sesi demi sesi'), href: pageUrl('programme'), icon: 'clock' },
-      { label: L('Invited speakers', 'Pembicara undangan'), sub: L('Five experts from four countries', 'Lima pakar dari empat negara'), href: pageUrl('speakers'), icon: 'mic' },
+      { label: L('Invited speakers', 'Pembicara undangan'), sub: SITE.speakers.length ? L(SITE.speakers.length + ' confirmed so far', SITE.speakers.length + ' telah dikonfirmasi') : L('Line-up coming soon', 'Daftar segera diumumkan'), href: pageUrl('speakers'), icon: 'mic' },
       { label: L('Important dates and venue', 'Tanggal penting dan lokasi'), sub: L('Deadlines from submission to proceedings', 'Batas waktu dari pengiriman hingga prosiding'), href: pageUrl('important-dates'), icon: 'calendar' }
     ] },
     { key: 'cfp', label: L('Call for Papers', 'Call for Papers'), items: [
@@ -780,6 +780,10 @@ PAGES.home = function () {
   const open = todayISO() <= sub.end;
   const fees = SITE.fees;
   const invitedTalks = SITE.schedule.filter((s) => s.type === 'invited' && speakerById(s.speaker));
+  const invitedTotal = SITE.schedule.filter((s) => s.type === 'invited').length;
+  const speakersHeading = !SITE.speakers.length ? L('Invited speakers', 'Pembicara undangan') :
+    SITE.speakers.length >= invitedTotal ? L('Five experts, five disciplines, one conversation', 'Lima pakar, lima disiplin, satu percakapan') :
+    L(SITE.speakers.length + ' confirmed speakers so far, more to be announced', SITE.speakers.length + ' pembicara telah dikonfirmasi, menyusul yang lain');
   const main = html`
   <section class="hero">
     <img class="hero__flower" src="${IMG('bicon-icon.png')}" alt="">
@@ -831,7 +835,7 @@ PAGES.home = function () {
   <section class="section section--tint" id="speakers">
     <div class="wrap">
       <div class="sec-head sec-head--row rv">
-        <div><div class="eyebrow">${esc(L('Invited speakers', 'Pembicara undangan'))}</div><h2 class="h2">${esc(L(SITE.speakers.length ? 'Five experts, five disciplines, one conversation' : 'Invited speakers', SITE.speakers.length ? 'Lima pakar, lima disiplin, satu percakapan' : 'Pembicara undangan'))}</h2></div>
+        <div><div class="eyebrow">${esc(L('Invited speakers', 'Pembicara undangan'))}</div><h2 class="h2">${esc(speakersHeading)}</h2></div>
         ${btn(L('All speakers', 'Semua pembicara'), pageUrl('speakers'), 'btn--outline')}
       </div>
       ${SITE.speakers.length ? '<div class="grid grid--spk">' + SITE.speakers.map((s) => speakerCard(s)).join('') + '</div>' : speakersEmpty()}
@@ -1045,14 +1049,18 @@ PAGES.programme = function () {
    SPEAKERS
    ========================================================================== */
 PAGES.speakers = function () {
+  const invitedTotal = SITE.schedule.filter((s) => s.type === 'invited').length;
+  const speakersLead = !SITE.speakers.length ? L('Invitations are being finalised. The confirmed line-up will appear here.', 'Undangan sedang difinalisasi. Daftar pembicara yang telah dikonfirmasi akan tampil di sini.') :
+    SITE.speakers.length >= invitedTotal ? L('Five experts from Singapore, Indonesia, Malaysia, Thailand and the United Kingdom, each speaking to one pillar of the One Health response.', 'Lima pakar dari Singapura, Indonesia, Malaysia, Thailand, dan Inggris Raya, masing-masing membahas satu pilar respons One Health.') :
+    L(SITE.speakers.length + ' speaker(s) confirmed so far, each speaking to one pillar of the One Health response. More invited speakers will be announced soon.', SITE.speakers.length + ' pembicara telah dikonfirmasi, masing-masing membahas satu pilar respons One Health. Pembicara undangan lainnya akan diumumkan menyusul.');
   const main = html`
-  ${pageHero({ title: L('Invited speakers', 'Pembicara undangan'), lead: SITE.speakers.length ? L('Five experts from Singapore, Indonesia, Malaysia, Thailand and the United Kingdom, each speaking to one pillar of the One Health response.', 'Lima pakar dari Singapura, Indonesia, Malaysia, Thailand, dan Inggris Raya, masing-masing membahas satu pilar respons One Health.') : L('Invitations are being finalised. The confirmed line-up will appear here.', 'Undangan sedang difinalisasi. Daftar pembicara yang telah dikonfirmasi akan tampil di sini.'), parent: [L('Programme', 'Program'), pageUrl('programme')] })}
+  ${pageHero({ title: L('Invited speakers', 'Pembicara undangan'), lead: speakersLead, parent: [L('Programme', 'Program'), pageUrl('programme')] })}
   <section class="section">
     <div class="wrap">
       ${SITE.speakers.length ? '<div class="grid grid--3">' + SITE.speakers.map((s) => speakerCard(s)).join('') + '</div><div class="callout rv" style="margin-top:34px"><p>' + esc(L('Select a speaker to read the full profile and session abstract.', 'Pilih pembicara untuk membaca profil lengkap dan abstrak sesi.')) + '</p></div>' : speakersEmpty()}
     </div>
   </section>${extraBlock()}`;
-  return { title: L('Invited speakers', 'Pembicara undangan'), desc: L('Meet the five invited speakers of B-ICON 2026.', 'Kenali lima pembicara undangan B-ICON 2026.'), main, init() { bindSpeakerCards(); } };
+  return { title: L('Invited speakers', 'Pembicara undangan'), desc: SITE.speakers.length >= invitedTotal ? L('Meet the five invited speakers of B-ICON 2026.', 'Kenali lima pembicara undangan B-ICON 2026.') : L('Meet the confirmed invited speakers of B-ICON 2026.', 'Kenali pembicara undangan B-ICON 2026 yang telah dikonfirmasi.'), main, init() { bindSpeakerCards(); } };
 };
 
 /* ==========================================================================

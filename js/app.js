@@ -56,6 +56,7 @@ const ASSET = (function () {
 })();
 const IMG = (f) => ASSET + 'img/' + f;
 const SPK = (f) => ASSET + 'speakers/' + f;
+const FILE = (f) => ASSET + 'files/' + f;
 
 /* ---------- tiny helpers ---------- */
 const $ = (s, r) => (r || document).querySelector(s);
@@ -327,7 +328,11 @@ function navModel() {
       { label: L('Fees and payment', 'Biaya dan pembayaran'), sub: L('Fees by category', 'Biaya per kategori'), href: pageUrl('registration') + '#fees', icon: 'wallet' },
       { label: L('My registration', 'Registrasi saya'), sub: L('Check status, upload payment proof and poster', 'Cek status, unggah bukti bayar dan poster'), href: pageUrl('my-registration'), icon: 'user' }
     ] },
-    { key: 'expo', label: L('Poster Exhibition', 'Pameran Poster'), href: pageUrl('poster-exhibition') },
+    { key: 'expo', label: L('Poster Exhibition', 'Pameran Poster'), items: [
+      { label: L('Poster exhibition', 'Pameran poster'), sub: L('Browse accepted posters', 'Jelajahi poster yang diterima'), href: pageUrl('poster-exhibition'), icon: 'image' },
+      { label: L('Download poster template', 'Unduh template poster'), sub: L('A1 size, PowerPoint format', 'Ukuran A1, format PowerPoint'), href: FILE('B-ICON2026-Poster-Template-A1.pptx'), icon: 'download' },
+      { label: L('Upload your poster', 'Unggah poster Anda'), sub: L('For accepted poster presenters, via My Registration', 'Bagi presenter poster yang diterima, lewat Registrasi Saya'), href: pageUrl('my-registration'), icon: 'upload' }
+    ] },
     { key: 'news', label: L('News', 'Berita'), href: pageUrl('news') },
     { key: 'contact', label: L('Contact', 'Kontak'), href: pageUrl('contact') }
   ];
@@ -1831,7 +1836,7 @@ function myRegHtml(r) {
   if (pres && r.presentationMode === 'poster') {
     const ps2 = statusKey(r.posterStatus || 'none');
     posterBox = '<div class="card" style="margin-top:18px"><h4 style="font-size:19px;margin-bottom:6px">' + esc(L('Poster', 'Poster')) + ' ' + pill(ps2 === 'published' ? 'paid' : ps2 === 'pending' ? 'review' : 'pending', lab[ps2] || r.posterStatus || lab.none) + '</h4>' +
-      (canPoster ? '<p style="color:var(--ink2)">' + esc(L('Upload your camera-ready poster (JPG, PNG or PDF). After the committee approves it, it appears in the virtual poster exhibition.', 'Unggah poster final Anda (JPG, PNG, atau PDF). Setelah disetujui panitia, poster tampil di pameran poster virtual.')) + '</p>' + posterFormHtml(r) : '<p style="color:var(--ink2);margin:0">' + esc(st === 'accepted' ? L('Poster upload is available for accepted poster presenters.', 'Unggah poster tersedia bagi presenter poster yang diterima.') : L('Poster upload opens after your paper is accepted (17 October 2026).', 'Unggah poster dibuka setelah naskah Anda diterima (17 Oktober 2026).')) + '</p>') + '</div>';
+      (canPoster ? '<p style="color:var(--ink2)">' + esc(L('Upload your camera-ready poster (JPG, PNG or PDF). After the committee approves it, it appears in the virtual poster exhibition.', 'Unggah poster final Anda (JPG, PNG, atau PDF). Setelah disetujui panitia, poster tampil di pameran poster virtual.')) + ' <a href="' + FILE('B-ICON2026-Poster-Template-A1.pptx') + '" target="_blank" rel="noopener">' + icon('download') + ' ' + esc(L('Download the A1 template', 'Unduh template A1')) + '</a></p>' + posterFormHtml(r) : '<p style="color:var(--ink2);margin:0">' + esc(st === 'accepted' ? L('Poster upload is available for accepted poster presenters.', 'Unggah poster tersedia bagi presenter poster yang diterima.') : L('Poster upload opens after your paper is accepted (17 October 2026).', 'Unggah poster dibuka setelah naskah Anda diterima (17 Oktober 2026).')) + '</p>') + '</div>';
   }
   const STATUS_EXPLAIN = { received: L('Received means the committee has received your article and it is waiting to be reviewed.', 'Diterima berarti artikel Anda telah diterima panitia dan menunggu untuk direview.'), review: L('Under review means the science committee and its reviewers are currently assessing your article.', 'Sedang direview berarti komite ilmiah dan reviewer sedang menilai artikel Anda.'), accepted: L('Accepted means your article has been approved for presentation at the conference.', 'Diterima (accepted) berarti artikel Anda disetujui untuk dipresentasikan di konferensi.'), revision: L('Revision requested means the committee needs changes to your article before it can be accepted.', 'Perlu revisi berarti panitia meminta perbaikan pada artikel Anda sebelum dapat diterima.'), rejected: L('Not accepted means your article was not approved to be presented as a paper at this conference.', 'Tidak diterima berarti artikel Anda tidak disetujui untuk dipresentasikan sebagai naskah di konferensi ini.') }[st];
   return '<div class="form-card"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:6px"><h3 style="margin:0;margin-right:auto">' + esc(L('Your registration', 'Registrasi Anda')) + '</h3>' +
@@ -2159,7 +2164,7 @@ onModalClosed = function () { if (location.hash.indexOf('#poster=') === 0) { try
 PAGES['poster-exhibition'] = function () {
   const main = html`
   ${CFG.features.demo ? '<div class="demo-flag">' + esc(L('Design preview: the posters below are samples', 'Pratinjau desain: poster di bawah ini hanyalah contoh')) + '</div>' : ''}
-  ${pageHero({ title: L('Virtual poster exhibition', 'Pameran poster virtual'), lead: L('Browse accepted scientific posters from B-ICON 2026. Search by keyword, filter by track, read the abstract and show your appreciation to the authors.', 'Jelajahi poster ilmiah B-ICON 2026 yang diterima. Cari dengan kata kunci, saring per bidang, baca abstrak, dan berikan apresiasi kepada penulis.'), parent: [L('Poster exhibition', 'Pameran poster'), pageUrl('poster-exhibition')], actions: btn(L('Present a poster', 'Presentasikan poster'), pageUrl('registration'), 'btn--primary') + btn(L('Upload my poster', 'Unggah poster saya'), pageUrl('my-registration'), 'btn--ghost', 'upload') })}
+  ${pageHero({ title: L('Virtual poster exhibition', 'Pameran poster virtual'), lead: L('Browse accepted scientific posters from B-ICON 2026. Search by keyword, filter by track, read the abstract and show your appreciation to the authors.', 'Jelajahi poster ilmiah B-ICON 2026 yang diterima. Cari dengan kata kunci, saring per bidang, baca abstrak, dan berikan apresiasi kepada penulis.'), parent: [L('Poster exhibition', 'Pameran poster'), pageUrl('poster-exhibition')], actions: btn(L('Present a poster', 'Presentasikan poster'), pageUrl('registration'), 'btn--primary') + btn(L('Upload my poster', 'Unggah poster saya'), pageUrl('my-registration'), 'btn--ghost', 'upload') + btn(L('Download poster template', 'Unduh template poster'), FILE('B-ICON2026-Poster-Template-A1.pptx'), 'btn--outline', 'download', true) })}
   <section class="expo">
     <div class="expo__bar">
       <div class="wrap">
@@ -2178,7 +2183,7 @@ PAGES['poster-exhibition'] = function () {
     ${secHead(L('For presenters', 'Untuk presenter'), L('How your poster gets here', 'Bagaimana poster Anda tampil di sini'))}
     <div class="steps">
       <div class="step rv"><h4>${esc(L('Get accepted', 'Diterima'))}</h4><p>${esc(L('Register as a poster presenter and submit your paper. Acceptance is announced on 17 October 2026.', 'Daftar sebagai presenter poster dan kirim naskah. Penerimaan diumumkan 17 Oktober 2026.'))}</p></div>
-      <div class="step rv" data-d="1"><h4>${esc(L('Upload your poster', 'Unggah poster'))}</h4><p>${esc(L('Use My Registration to upload a JPG, PNG or PDF, plus an optional video link.', 'Gunakan Registrasi Saya untuk mengunggah JPG, PNG, atau PDF, serta tautan video opsional.'))}</p></div>
+      <div class="step rv" data-d="1"><h4>${esc(L('Upload your poster', 'Unggah poster'))}</h4><p>${esc(L('Prepare your poster using the A1 template, then use My Registration to upload a JPG, PNG or PDF, plus an optional video link.', 'Siapkan poster Anda memakai template A1, lalu gunakan Registrasi Saya untuk mengunggah JPG, PNG, atau PDF, serta tautan video opsional.'))} <a href="${FILE('B-ICON2026-Poster-Template-A1.pptx')}" target="_blank" rel="noopener">${icon('download')} ${esc(L('Download template', 'Unduh template'))}</a></p></div>
       <div class="step rv" data-d="2"><h4>${esc(L('Committee review', 'Ditinjau panitia'))}</h4><p>${esc(L('The committee checks the file and publishes it. You get an email when it is live.', 'Panitia memeriksa berkas lalu menerbitkannya. Anda mendapat email saat poster tayang.'))}</p></div>
       <div class="step rv" data-d="3"><h4>${esc(L('Share it', 'Bagikan'))}</h4><p>${esc(L('Every poster has its own link you can send to colleagues and reviewers.', 'Setiap poster memiliki tautan sendiri yang bisa Anda kirim ke kolega dan reviewer.'))}</p></div>
     </div>

@@ -587,7 +587,7 @@ function regStatus() {
   const ov = (window.__BICON_OVERRIDES && window.__BICON_OVERRIDES.regStatus) || {};
   return {
     presenterId: Object.assign({ open: false }, ov.presenterId),
-    presenterIntl: Object.assign({ open: true, deadline: '2026-10-20' }, ov.presenterIntl),
+    presenterIntl: Object.assign({ open: true, deadline: '2026-10-26' }, ov.presenterIntl),
     participant: Object.assign({ open: true, deadline: '2026-10-25' }, ov.participant)
   };
 }
@@ -635,6 +635,12 @@ function regStatusWidget() {
 }
 
 /* ---------- key dates ---------- */
+function fmtRangeStrike(d) {
+  if (!d.was) return esc(fmtRange(d.start, d.end));
+  const oldStr = fmtRange(d.was.start || d.start, d.was.end || d.end);
+  const newStr = fmtRange(d.start, d.end);
+  return '<span class="tl__was">' + esc(oldStr) + '</span><span class="tl__new">' + esc(newStr) + '</span>';
+}
 function datesList() {
   const ov = (window.__BICON_OVERRIDES && window.__BICON_OVERRIDES.dates) || {};
   return SITE.dates.map((d) => {
@@ -652,7 +658,7 @@ function datesTimeline(limit) {
     let cls = st === 'done' ? 'is-done' : st === 'now' ? 'is-now' : (i === firstNext ? 'is-now' : '');
     if (d.highlight) cls += ' is-hi';
     const label = st === 'done' ? L('Done', 'Selesai') : st === 'now' ? (d.highlight ? L('Live', 'Berlangsung') : L('Open now', 'Dibuka')) : (i === firstNext ? L('Next', 'Berikutnya') : '');
-    return '<li class="tl__i ' + cls + ' rv" data-d="' + (i % 4) + '">' + (label ? '<span class="tl__st">' + esc(label) + '</span>' : '') + '<div class="tl__ico">' + icon(d.icon || 'calendar') + '</div><div class="tl__d">' + esc(fmtRange(d.start, d.end)) + '</div><div class="tl__t">' + esc(t(d.label)) + '</div>' + (d.note ? '<div class="tl__n">' + esc(t(d.note)) + '</div>' : '') + '</li>';
+    return '<li class="tl__i ' + cls + ' rv" data-d="' + (i % 4) + '">' + (label ? '<span class="tl__st">' + esc(label) + '</span>' : '') + '<div class="tl__ico">' + icon(d.icon || 'calendar') + '</div><div class="tl__d">' + fmtRangeStrike(d) + '</div><div class="tl__t">' + esc(t(d.label)) + '</div>' + (d.note ? '<div class="tl__n">' + esc(t(d.note)) + '</div>' : '') + '</li>';
   });
   return '<ol class="tl">' + items.slice(0, limit || items.length).join('') + '</ol>';
 }
@@ -1179,7 +1185,7 @@ PAGES['call-for-papers'] = function () {
       <div class="rv">
         <div class="eyebrow">${esc(L('Theme', 'Tema'))}</div>
         <h2 class="h2">${esc(t(M.theme))}</h2>
-        <p class="lead" style="margin:18px 0 22px">${esc(L('Full paper submission runs from ', 'Pengiriman naskah lengkap berlangsung ') + fmtRange(sub.start, sub.end) + L(', and acceptance is announced on 17 October 2026.', ', dan penerimaan diumumkan pada 17 Oktober 2026.'))}</p>
+        <p class="lead" style="margin:18px 0 22px">${esc(L('Full paper submission runs from ', 'Pengiriman naskah lengkap berlangsung ') + fmtRange(sub.start, sub.end) + L(' (extended for International Presenters). Acceptance notifications begin 17 October 2026.', ' (diperpanjang untuk Presenter Internasional). Notifikasi penerimaan mulai dikirim 17 Oktober 2026.'))}</p>
         <div class="grid grid--2" style="gap:14px">
           <div class="card feat" style="padding:20px"><div class="feat__ico" style="background:linear-gradient(135deg,var(--o500),var(--o600))">${icon('mic')}</div><div><h4>${esc(L('Oral presentation', 'Presentasi oral'))}</h4><p>${esc(L('Presented online in a scheduled session.', 'Dipresentasikan daring pada sesi terjadwal.'))}</p></div></div>
           <div class="card feat" style="padding:20px"><div class="feat__ico">${icon('board')}</div><div><h4>${esc(L('Poster presentation', 'Presentasi poster'))}</h4><p>${esc(L('Shown in the virtual poster exhibition.', 'Ditampilkan di pameran poster virtual.'))}</p></div></div>
@@ -1229,8 +1235,8 @@ function bindZoom() {
 PAGES['author-guidelines'] = function () {
   const steps = [
     [L('Register and submit', 'Registrasi dan kirim naskah'), L('Complete the registration form as a presenter and upload your full manuscript in the same form. You receive a registration ID by email.', 'Lengkapi formulir registrasi sebagai presenter dan unggah naskah lengkap Anda pada formulir yang sama. Anda menerima ID registrasi lewat email.')],
-    [L('Submit your full paper', 'Kirim naskah lengkap'), L('Choose one publication option when you register, between 21 September and 10 October 2026, then submit the same paper yourself to OJS B-ICON Proceeding — that is where the committee\'s review takes place.', 'Pilih satu opsi publikasi saat Anda registrasi, antara 21 September dan 10 Oktober 2026, lalu submit sendiri naskah yang sama ke OJS B-ICON Proceeding — di sanalah review oleh panitia dilakukan.')],
-    [L('Acceptance and payment', 'Penerimaan dan pembayaran'), L('The science committee reviews the paper and acceptance is announced on 17 October. Pay the registration fee by 19 October and upload the proof on My Registration.', 'Komite ilmiah mereview naskah dan penerimaan diumumkan 17 Oktober. Bayar biaya registrasi paling lambat 19 Oktober dan unggah bukti di Registrasi Saya.')],
+    [L('Submit your full paper', 'Kirim naskah lengkap'), L('Choose one publication option when you register, between 21 September and 10 October 2026 (International Presenters: extended to 26 October 2026), then submit the same paper yourself to OJS B-ICON Proceeding — that is where the committee\'s review takes place.', 'Pilih satu opsi publikasi saat Anda registrasi, antara 21 September dan 10 Oktober 2026 (Presenter Internasional: diperpanjang hingga 26 Oktober 2026), lalu submit sendiri naskah yang sama ke OJS B-ICON Proceeding — di sanalah review oleh panitia dilakukan.')],
+    [L('Acceptance and payment', 'Penerimaan dan pembayaran'), L('The science committee reviews the paper and acceptance is announced on 17 October. Pay the registration fee by 19 October and upload the proof on My Registration. If you submit during the extended window for International Presenters, the committee contacts you directly about your acceptance and payment timing.', 'Komite ilmiah mereview naskah dan penerimaan diumumkan 17 Oktober. Bayar biaya registrasi paling lambat 19 Oktober dan unggah bukti di Registrasi Saya. Jika Anda submit pada masa perpanjangan untuk Presenter Internasional, panitia akan menghubungi Anda langsung soal waktu penerimaan dan pembayaran.')],
     [L('Camera-ready materials', 'Materi final'), L('Send your final presentation slides or poster by 21 October 2026. Posters join the virtual exhibition.', 'Kirim slide presentasi atau poster final paling lambat 21 Oktober 2026. Poster masuk ke pameran virtual.')],
     [L('Present and publish', 'Presentasi dan publikasi'), L('Present online on 28 October. Submit the final full paper by 11 November; the B-ICON proceedings are published by 31 December 2026.', 'Presentasikan daring pada 28 Oktober. Kirim naskah lengkap final paling lambat 11 November; prosiding B-ICON terbit paling lambat 31 Desember 2026.')]
   ];

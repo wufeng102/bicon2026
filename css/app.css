@@ -302,6 +302,10 @@ main { display: block; }
 .tl__i.is-done .tl__ico { background: #DDF5E8; color: var(--green); }
 .tl__i.is-hi .tl__ico { background: rgba(255, 255, 255, .16); color: var(--a400); }
 .tl__d { font-family: var(--font-d); font-weight: 800; font-size: 22px; letter-spacing: -.02em; color: var(--v700); line-height: 1.15; }
+.tl__was { display: block; font-family: var(--font-b, inherit); font-weight: 600; font-size: 13px; letter-spacing: 0; color: var(--muted); text-decoration: line-through; text-decoration-thickness: 1.5px; margin-bottom: 2px; }
+.tl__new { color: var(--o600); }
+.tl__i.is-hi .tl__was { color: rgba(255, 255, 255, .6); }
+.tl__i.is-hi .tl__new { color: var(--a400); }
 .tl__t { font-weight: 700; font-size: 15px; color: var(--ink); line-height: 1.4; }
 .tl__n { font-size: 13px; color: var(--muted); line-height: 1.45; }
 .tl__st { position: absolute; top: 16px; right: 16px; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; background: var(--v100); color: var(--v700); }

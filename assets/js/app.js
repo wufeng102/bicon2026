@@ -56,6 +56,7 @@ const ASSET = (function () {
 })();
 const IMG = (f) => ASSET + 'img/' + f;
 const SPK = (f) => ASSET + 'speakers/' + f;
+const FILE = (f) => ASSET + 'files/' + f;
 
 /* ---------- tiny helpers ---------- */
 const $ = (s, r) => (r || document).querySelector(s);
@@ -327,7 +328,11 @@ function navModel() {
       { label: L('Fees and payment', 'Biaya dan pembayaran'), sub: L('Fees by category', 'Biaya per kategori'), href: pageUrl('registration') + '#fees', icon: 'wallet' },
       { label: L('My registration', 'Registrasi saya'), sub: L('Check status, upload payment proof and poster', 'Cek status, unggah bukti bayar dan poster'), href: pageUrl('my-registration'), icon: 'user' }
     ] },
-    { key: 'expo', label: L('Poster Exhibition', 'Pameran Poster'), href: pageUrl('poster-exhibition') },
+    { key: 'expo', label: L('Poster Exhibition', 'Pameran Poster'), items: [
+      { label: L('Poster exhibition', 'Pameran poster'), sub: L('Browse accepted posters', 'Jelajahi poster yang diterima'), href: pageUrl('poster-exhibition'), icon: 'image' },
+      { label: L('Download poster template', 'Unduh template poster'), sub: L('A1 size, PowerPoint format', 'Ukuran A1, format PowerPoint'), href: FILE('B-ICON2026-Poster-Template-A1.pptx'), icon: 'download' },
+      { label: L('Upload your poster', 'Unggah poster Anda'), sub: L('For accepted poster presenters, via My Registration', 'Bagi presenter poster yang diterima, lewat Registrasi Saya'), href: pageUrl('my-registration'), icon: 'upload' }
+    ] },
     { key: 'news', label: L('News', 'Berita'), href: pageUrl('news') },
     { key: 'contact', label: L('Contact', 'Kontak'), href: pageUrl('contact') }
   ];
@@ -573,7 +578,69 @@ function initCountdowns() {
   });
 }
 
+/* ---------- registration status (per category) ---------- */
+// Fallback only (used before the live GAS value loads, or in preview/demo mode). The real values
+// live in the Config sheet (PRESENTER_ID_OPEN / REG_DEADLINE_INTL / REG_DEADLINE_PARTICIPANT) and
+// in gas/Code.gs's APP object / regStatus_(); change the values there, not here, so the website
+// and the form's auto-close stay in sync.
+function regStatus() {
+  const ov = (window.__BICON_OVERRIDES && window.__BICON_OVERRIDES.regStatus) || {};
+  return {
+    presenterId: Object.assign({ open: false }, ov.presenterId),
+    presenterIntl: Object.assign({ open: true, deadline: '2026-10-26' }, ov.presenterIntl),
+    participant: Object.assign({ open: true, deadline: '2026-10-25' }, ov.participant)
+  };
+}
+function regDeadlineFmt_(iso) { return fmt(dObj(iso), { day: 'numeric', month: 'long', year: 'numeric' }); }
+
+// Detailed notice for the registration page: explains all three tracks.
+function regStatusNotice() {
+  const s = regStatus();
+  const dIntl = regDeadlineFmt_(s.presenterIntl.deadline);
+  const dPart = regDeadlineFmt_(s.participant.deadline);
+  const presenterIdLine = s.presenterId.open
+    ? esc(L('Registration to present as an Indonesia-based presenter is open.', 'Pendaftaran untuk menjadi presenter dengan afiliasi Indonesia masih dibuka.'))
+    : '<b>' + esc(L('Registration to present as an Indonesia-based presenter is closed.', 'Pendaftaran untuk menjadi presenter dengan afiliasi Indonesia sudah ditutup.')) + '</b> ' +
+      esc(L('If you are registering as part of a co-host institution, please contact the secretariat directly.', 'Khusus pendaftar dari institusi Co-Host, silakan hubungi panitia secara langsung.'));
+  const presenterIntlLine = s.presenterIntl.open
+    ? esc(L('Registration for presenters with an international affiliation stays open until ', 'Pendaftaran untuk presenter dengan afiliasi luar negeri masih dibuka hingga ')) + '<b>' + esc(dIntl) + '</b>.'
+    : '<b>' + esc(L('Registration for presenters with an international affiliation closed on ', 'Pendaftaran untuk presenter dengan afiliasi luar negeri sudah ditutup sejak ')) + esc(dIntl) + '.</b>';
+  const participantLine = s.participant.open
+    ? esc(L('Registration as a participant stays open until ', 'Pendaftaran untuk menjadi partisipan masih dibuka hingga ')) + '<b>' + esc(dPart) + '</b>.'
+    : '<b>' + esc(L('Registration as a participant closed on ', 'Pendaftaran untuk menjadi partisipan sudah ditutup sejak ')) + esc(dPart) + '.</b>';
+  return '<div class="alert alert--info" style="margin-top:20px">' + icon('clock') + '<span>' +
+    '<b>' + esc(L('Registration status', 'Status pendaftaran')) + '.</b> ' +
+    presenterIdLine + ' ' + presenterIntlLine + ' ' + participantLine + ' ' +
+    esc(L('The form closes automatically once the deadline or closure that applies to your category has passed.', 'Formulir akan tertutup otomatis setelah melewati tanggal atau penutupan yang berlaku untuk kategori Anda.')) +
+    '</span></div>';
+}
+
+// Compact status widget for the home page ("bagian depan"): three rows, one per track.
+function regStatusWidget() {
+  const s = regStatus();
+  const dIntl = regDeadlineFmt_(s.presenterIntl.deadline);
+  const dPart = regDeadlineFmt_(s.participant.deadline);
+  const row = (open, title, sub) => '<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)">' +
+    '<span class="status-pill ' + (open ? 'st-accepted' : 'st-rejected') + '">' + (open ? esc(L('Open', 'Dibuka')) : esc(L('Closed', 'Ditutup'))) + '</span>' +
+    '<span style="flex:1"><b>' + esc(title) + '</b><br><span style="font-size:13px;color:var(--muted)">' + sub + '</span></span></div>';
+  return '<div class="card" style="margin-top:20px">' +
+    '<h4 style="margin-bottom:4px">' + icon('ticket') + ' ' + esc(L('Registration status', 'Status pendaftaran')) + '</h4>' +
+    '<div style="margin-top:10px">' +
+    row(s.presenterId.open, L('Indonesian presenter', 'Presenter afiliasi Indonesia'), s.presenterId.open ? esc(L('Open', 'Dibuka')) : esc(L('Closed. Co-host institutions: contact the secretariat.', 'Ditutup. Institusi Co-Host: hubungi panitia.'))) +
+    row(s.presenterIntl.open, L('International presenter', 'Presenter afiliasi luar negeri'), (s.presenterIntl.open ? esc(L('Open until ', 'Dibuka hingga ')) : esc(L('Closed since ', 'Ditutup sejak '))) + esc(dIntl)) +
+    row(s.participant.open, L('Participant', 'Partisipan'), (s.participant.open ? esc(L('Open until ', 'Dibuka hingga ')) : esc(L('Closed since ', 'Ditutup sejak '))) + esc(dPart)) +
+    '</div>' +
+    '<a href="' + pageUrl('registration') + '" style="display:inline-block;margin-top:14px;font-weight:700;color:var(--v700)">' + esc(L('Go to registration', 'Ke halaman registrasi')) + ' ' + icon('arrow') + '</a>' +
+    '</div>';
+}
+
 /* ---------- key dates ---------- */
+function fmtRangeStrike(d) {
+  if (!d.was) return esc(fmtRange(d.start, d.end));
+  const oldStr = fmtRange(d.was.start || d.start, d.was.end || d.end);
+  const newStr = fmtRange(d.start, d.end);
+  return '<span class="tl__was">' + esc(oldStr) + '</span><span class="tl__new">' + esc(newStr) + '</span>';
+}
 function datesList() {
   const ov = (window.__BICON_OVERRIDES && window.__BICON_OVERRIDES.dates) || {};
   return SITE.dates.map((d) => {
@@ -591,7 +658,7 @@ function datesTimeline(limit) {
     let cls = st === 'done' ? 'is-done' : st === 'now' ? 'is-now' : (i === firstNext ? 'is-now' : '');
     if (d.highlight) cls += ' is-hi';
     const label = st === 'done' ? L('Done', 'Selesai') : st === 'now' ? (d.highlight ? L('Live', 'Berlangsung') : L('Open now', 'Dibuka')) : (i === firstNext ? L('Next', 'Berikutnya') : '');
-    return '<li class="tl__i ' + cls + ' rv" data-d="' + (i % 4) + '">' + (label ? '<span class="tl__st">' + esc(label) + '</span>' : '') + '<div class="tl__ico">' + icon(d.icon || 'calendar') + '</div><div class="tl__d">' + esc(fmtRange(d.start, d.end)) + '</div><div class="tl__t">' + esc(t(d.label)) + '</div>' + (d.note ? '<div class="tl__n">' + esc(t(d.note)) + '</div>' : '') + '</li>';
+    return '<li class="tl__i ' + cls + ' rv" data-d="' + (i % 4) + '">' + (label ? '<span class="tl__st">' + esc(label) + '</span>' : '') + '<div class="tl__ico">' + icon(d.icon || 'calendar') + '</div><div class="tl__d">' + fmtRangeStrike(d) + '</div><div class="tl__t">' + esc(t(d.label)) + '</div>' + (d.note ? '<div class="tl__n">' + esc(t(d.note)) + '</div>' : '') + '</li>';
   });
   return '<ol class="tl">' + items.slice(0, limit || items.length).join('') + '</ol>';
 }
@@ -815,6 +882,7 @@ PAGES.home = function () {
   </section>
 
   <div class="wrap">
+    ${regStatusWidget()}
     <div class="stats rv">${SITE.stats.map((s) => `<div class="stat"><b>${esc(s.value)}<em>${esc(s.suffix)}</em></b><span>${esc(t(s.label))}</span></div>`)}</div>
   </div>
 
@@ -1117,7 +1185,7 @@ PAGES['call-for-papers'] = function () {
       <div class="rv">
         <div class="eyebrow">${esc(L('Theme', 'Tema'))}</div>
         <h2 class="h2">${esc(t(M.theme))}</h2>
-        <p class="lead" style="margin:18px 0 22px">${esc(L('Full paper submission runs from ', 'Pengiriman naskah lengkap berlangsung ') + fmtRange(sub.start, sub.end) + L(', and acceptance is announced on 17 October 2026.', ', dan penerimaan diumumkan pada 17 Oktober 2026.'))}</p>
+        <p class="lead" style="margin:18px 0 22px">${esc(L('Full paper submission runs from ', 'Pengiriman naskah lengkap berlangsung ') + fmtRange(sub.start, sub.end) + L(' (extended for International Presenters). Acceptance notifications begin 17 October 2026.', ' (diperpanjang untuk Presenter Internasional). Notifikasi penerimaan mulai dikirim 17 Oktober 2026.'))}</p>
         <div class="grid grid--2" style="gap:14px">
           <div class="card feat" style="padding:20px"><div class="feat__ico" style="background:linear-gradient(135deg,var(--o500),var(--o600))">${icon('mic')}</div><div><h4>${esc(L('Oral presentation', 'Presentasi oral'))}</h4><p>${esc(L('Presented online in a scheduled session.', 'Dipresentasikan daring pada sesi terjadwal.'))}</p></div></div>
           <div class="card feat" style="padding:20px"><div class="feat__ico">${icon('board')}</div><div><h4>${esc(L('Poster presentation', 'Presentasi poster'))}</h4><p>${esc(L('Shown in the virtual poster exhibition.', 'Ditampilkan di pameran poster virtual.'))}</p></div></div>
@@ -1167,8 +1235,8 @@ function bindZoom() {
 PAGES['author-guidelines'] = function () {
   const steps = [
     [L('Register and submit', 'Registrasi dan kirim naskah'), L('Complete the registration form as a presenter and upload your full manuscript in the same form. You receive a registration ID by email.', 'Lengkapi formulir registrasi sebagai presenter dan unggah naskah lengkap Anda pada formulir yang sama. Anda menerima ID registrasi lewat email.')],
-    [L('Submit your full paper', 'Kirim naskah lengkap'), L('Choose one publication option when you register, between 21 September and 10 October 2026, then submit the same paper yourself to OJS B-ICON Proceeding — that is where the committee\'s review takes place.', 'Pilih satu opsi publikasi saat Anda registrasi, antara 21 September dan 10 Oktober 2026, lalu submit sendiri naskah yang sama ke OJS B-ICON Proceeding — di sanalah review oleh panitia dilakukan.')],
-    [L('Acceptance and payment', 'Penerimaan dan pembayaran'), L('The science committee reviews the paper and acceptance is announced on 17 October. Pay the registration fee by 19 October and upload the proof on My Registration.', 'Komite ilmiah mereview naskah dan penerimaan diumumkan 17 Oktober. Bayar biaya registrasi paling lambat 19 Oktober dan unggah bukti di Registrasi Saya.')],
+    [L('Submit your full paper', 'Kirim naskah lengkap'), L('Choose one publication option when you register, between 21 September and 10 October 2026 (International Presenters: extended to 26 October 2026), then submit the same paper yourself to OJS B-ICON Proceeding — that is where the committee\'s review takes place.', 'Pilih satu opsi publikasi saat Anda registrasi, antara 21 September dan 10 Oktober 2026 (Presenter Internasional: diperpanjang hingga 26 Oktober 2026), lalu submit sendiri naskah yang sama ke OJS B-ICON Proceeding — di sanalah review oleh panitia dilakukan.')],
+    [L('Acceptance and payment', 'Penerimaan dan pembayaran'), L('The science committee reviews the paper and acceptance is announced on 17 October. Pay the registration fee by 19 October and upload the proof on My Registration. If you submit during the extended window for International Presenters, the committee contacts you directly about your acceptance and payment timing.', 'Komite ilmiah mereview naskah dan penerimaan diumumkan 17 Oktober. Bayar biaya registrasi paling lambat 19 Oktober dan unggah bukti di Registrasi Saya. Jika Anda submit pada masa perpanjangan untuk Presenter Internasional, panitia akan menghubungi Anda langsung soal waktu penerimaan dan pembayaran.')],
     [L('Camera-ready materials', 'Materi final'), L('Send your final presentation slides or poster by 21 October 2026. Posters join the virtual exhibition.', 'Kirim slide presentasi atau poster final paling lambat 21 Oktober 2026. Poster masuk ke pameran virtual.')],
     [L('Present and publish', 'Presentasi dan publikasi'), L('Present online on 28 October. Submit the final full paper by 11 November; the B-ICON proceedings are published by 31 December 2026.', 'Presentasikan daring pada 28 Oktober. Kirim naskah lengkap final paling lambat 11 November; prosiding B-ICON terbit paling lambat 31 Desember 2026.')]
   ];
@@ -1415,7 +1483,21 @@ function dropzone(name, label, accept, maxMB, hint, req) {
 /* ---------- steps ---------- */
 function stepCategory() {
   const cats = CAT_ALL();
-  const group = (title, arr) => '<div class="lbl" style="margin:18px 0 10px;font-weight:800;color:var(--muted);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase">' + esc(title) + '</div><div class="opts">' + arr.map((c) => '<label class="opt"><input type="radio" name="category" value="' + c.id + '"' + (REG.data.category === c.id ? ' checked' : '') + '><span class="mark"></span><span class="opt__b"><span class="opt__t">' + esc(t(c.title)) + '</span><span class="opt__s">' + esc(t(c.sub)) + '</span></span><span class="opt__p">' + esc(c.amount) + '</span></label>').join('') + '</div>';
+  const s = regStatus();
+  // Open/closed per category, mirroring the enforcement in gas/Code.gs's register_().
+  const catOpen = (id) => id === 'presenter-id' ? s.presenterId.open : id === 'presenter-intl' ? s.presenterIntl.open : s.participant.open;
+  const catNote = (id) => {
+    if (id === 'presenter-id' && !s.presenterId.open) return L('registration closed — co-host institutions, please contact the secretariat', 'pendaftaran sudah ditutup — khusus Co-Host, hubungi panitia');
+    if (id === 'presenter-intl' && !s.presenterIntl.open) return L('registration closed since ' + regDeadlineFmt_(s.presenterIntl.deadline), 'pendaftaran sudah ditutup sejak ' + regDeadlineFmt_(s.presenterIntl.deadline));
+    if ((id === 'participant-online' || id === 'participant-onsite') && !s.participant.open) return L('registration closed since ' + regDeadlineFmt_(s.participant.deadline), 'pendaftaran sudah ditutup sejak ' + regDeadlineFmt_(s.participant.deadline));
+    return '';
+  };
+  // A restored draft may have a now-closed category selected; never show a disabled-but-checked radio.
+  if (REG.data.category && !catOpen(REG.data.category)) REG.data.category = '';
+  const group = (title, arr) => '<div class="lbl" style="margin:18px 0 10px;font-weight:800;color:var(--muted);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase">' + esc(title) + '</div><div class="opts">' + arr.map((c) => {
+    const open = catOpen(c.id), note = catNote(c.id);
+    return '<label class="opt' + (open ? '' : ' is-off') + '"><input type="radio" name="category" value="' + c.id + '"' + (REG.data.category === c.id ? ' checked' : '') + (open ? '' : ' disabled') + '><span class="mark"></span><span class="opt__b"><span class="opt__t">' + esc(t(c.title)) + '</span><span class="opt__s">' + esc(t(c.sub)) + (note ? ' · ' + esc(note) : '') + '</span></span><span class="opt__p">' + esc(c.amount) + '</span></label>';
+  }).join('') + '</div>';
   return '<h3>' + esc(L('How will you take part?', 'Bagaimana Anda akan berpartisipasi?')) + '</h3><p class="sub">' + esc(L('Choose the category that matches your role. The fee is shown for each option.', 'Pilih kategori yang sesuai dengan peran Anda. Biaya ditampilkan pada setiap pilihan.')) + '</p>' +
     '<div class="f" data-f="category">' + group(L('I want to present a paper', 'Saya ingin mempresentasikan makalah'), SITE.fees.presenters) + group(L('I want to attend', 'Saya ingin menghadiri'), SITE.fees.participants) + '<span class="err" id="e-category"></span></div>' +
     '<div class="callout callout--o" style="margin-top:22px">' + icon('gift', 'ico') + ' <b>' + esc(t(SITE.fees.special.title)) + '.</b> ' + esc(t(SITE.fees.special.text)) + '</div>';
@@ -1433,7 +1515,6 @@ function stepPersonal() {
     fld({ name: 'govId', label: wni ? L('National ID number (NIK)', 'Nomor Induk Kependudukan (NIK)') : L('Passport number', 'Nomor paspor'), small: wni ? L('16 digits, for Indonesian citizens', '16 digit, untuk Warga Negara Indonesia') : L('for non-Indonesian citizens', 'untuk Warga Negara Asing'), req: true, inputmode: wni ? 'numeric' : 'text', max: 24 }) +
     fld({ name: 'affiliation', label: L('Institution / affiliation', 'Institusi / afiliasi'), req: true, full: true, max: 200, ac: 'organization' }) +
     (pres ? '<div class="f f--full"><label class="check"><input type="checkbox" name="pkbAffiliated"' + (REG.data.pkbAffiliated ? ' checked' : '') + '><span>' + esc(L('I am affiliated with Poltekkes Kemenkes Bengkulu', 'Saya berafiliasi dengan Poltekkes Kemenkes Bengkulu')) + ' <small style="color:var(--muted)">' + esc(L('(this limits the publication options in the next step)', '(ini membatasi pilihan publikasi pada langkah berikutnya)')) + '</small></span></label></div>' : '') +
-    (REG.data.category === 'presenter-intl' ? '<div class="f f--full"><label class="check"><input type="checkbox" name="claimFree"' + (REG.data.claimFree ? ' checked' : '') + '><span>' + esc(L('I am claiming one of the first 10 free registration slots for international presenters', 'Saya mengklaim salah satu dari 10 slot registrasi gratis untuk presenter internasional')) + ' <small style="color:var(--muted)">' + esc(L('(subject to the committee confirming slot availability)', '(tergantung konfirmasi ketersediaan slot dari panitia)')) + '</small></span></label></div>' : '') +
     '<div class="f f--full" id="country-note"></div></div>';
 }
 function stepPaper() {
@@ -1450,6 +1531,7 @@ function stepPaper() {
     fld({ name: 'paperTitle', label: L('Paper title', 'Judul naskah'), req: true, full: true, max: 250 }) +
     '<div class="f f--full" data-f="presentationMode"><span class="lbl">' + esc(L('Presentation mode', 'Bentuk presentasi')) + ' <em>*</em></span><div class="opts" style="grid-template-columns:repeat(2,1fr)">' + modes.map((m) => '<label class="opt"><input type="radio" name="presentationMode" value="' + m[0] + '"' + (REG.data.presentationMode === m[0] ? ' checked' : '') + '><span class="mark"></span><span class="opt__b"><span class="opt__t">' + esc(m[1]) + '</span><span class="opt__s">' + esc(m[2]) + '</span></span></label>').join('') + '</div><span class="err"></span></div>' +
     '<div class="f f--full" data-f="publication"><span class="lbl">' + esc(L('Preferred publication output', 'Luaran publikasi pilihan')) + ' <em>*</em></span><div class="opts opts--pub">' + pubs + '</div><span class="hint">' + esc(t(SITE.publicationNotes[2])) + '</span><span class="err"></span></div>' +
+    (REG.data.category === 'presenter-intl' ? '<div class="f f--full" style="margin-top:-4px"><div class="alert alert--info" style="margin:0" id="intl-free-note">' + icon('gift') + '<span>' + (String(REG.data.publication) === '5' ? '<b>' + esc(L('Free for you.', 'Gratis untuk Anda.')) + '</b> ' + esc(L('Registration has no fee for international presenters who publish in the B-ICON Proceeding.', 'Registrasi tidak dipungut biaya bagi presenter internasional yang menerbitkan di B-ICON Proceeding.')) : esc(L('Registration is free for international presenters who choose B-ICON Proceeding above.', 'Registrasi gratis bagi presenter internasional yang memilih B-ICON Proceeding di atas.'))) + '</span></div></div>' : '') +
     dropzone('manuscript', L('Full paper', 'Naskah lengkap (Full Paper)'), '.pdf,.doc,.docx', CFG.limits.manuscriptMB, 'PDF, DOC, DOCX · max ' + CFG.limits.manuscriptMB + ' MB', true) +
     '</div><div class="alert alert--info" style="margin-top:20px">' + icon('info') + '<span>' + esc(L('After you submit this registration, also submit the same paper yourself to OJS B-ICON Proceeding — that is where the science committee does its review, whichever publication option you chose. Instructions and the OJS link are on the Author Guidelines page and on your My Registration page.', 'Setelah registrasi ini terkirim, unggah juga naskah yang sama ke OJS B-ICON Proceeding secara mandiri — di sanalah komite ilmiah melakukan reviewnya, apa pun pilihan publikasi Anda. Petunjuk dan tautan OJS ada di halaman Panduan Penulis dan di halaman Registrasi Saya Anda.')) + '</span></div>';
 }
@@ -1458,7 +1540,7 @@ function reviewRows() {
   const ctry = (countryList().find((c) => c.code === d.country) || {}).name || d.country;
   const wni = (d.country || 'ID') === 'ID';
   const rows = [[L('Category', 'Kategori'), cat ? t(cat.title) + ' · ' + cat.amount : ''], [L('Name (without title)', 'Nama (tanpa gelar)'), d.fullNamePlain], [L('Name for certificate', 'Nama untuk sertifikat'), d.fullNameCert], ['Email', d.email], [L('WhatsApp / phone', 'WhatsApp / telepon'), d.phone], [L('Country', 'Negara'), ctry], [wni ? 'NIK' : L('Passport number', 'Nomor paspor'), d.govId], [L('Institution', 'Institusi'), d.affiliation]];
-  if (d.category === 'presenter-intl' && d.claimFree) rows.push([L('Free slot', 'Slot gratis'), L('Claimed (subject to confirmation)', 'Diklaim (menunggu konfirmasi)')]);
+  if (d.category === 'presenter-intl' && String(d.publication) === '5') rows.push([L('Fee', 'Biaya'), L('Free (international presenter, B-ICON Proceeding)', 'Gratis (presenter internasional, B-ICON Proceeding)')]);
   if (isPresenter(d.category)) {
     const pub = SITE.publications.find((p) => String(p.n) === String(d.publication));
     rows.push([L('Paper title', 'Judul naskah'), d.paperTitle], [L('Presentation', 'Presentasi'), d.presentationMode === 'oral' ? L('Oral', 'Oral') : L('Poster', 'Poster')], [L('Publication', 'Publikasi'), pub ? pub.name + ' (' + pub.index + ')' : '']);
@@ -1529,6 +1611,13 @@ function countryNote() {
   if (d.category === 'presenter-intl' && d.country === 'ID') msg = L('The international presenter category (USD 50) is for non-Indonesian presenters. The committee will confirm the right category with you.', 'Kategori presenter internasional (USD 50) untuk presenter non-Indonesia. Panitia akan mengonfirmasi kategori yang tepat kepada Anda.');
   box.innerHTML = msg ? '<div class="alert alert--info" style="margin:0">' + icon('info') + '<span>' + esc(msg) + '</span></div>' : '';
 }
+// Registration is free, automatically, for any international presenter who picks publication #5
+// (B-ICON Proceeding) - no checkbox to claim it and no cap. See freeIntlProceeding in gas/Code.gs.
+function intlFreeNote() {
+  const box = $('#intl-free-note'); if (!box) return;
+  const isProceeding = String(REG.data.publication) === '5';
+  box.innerHTML = icon('gift') + '<span>' + (isProceeding ? '<b>' + esc(L('Free for you.', 'Gratis untuk Anda.')) + '</b> ' + esc(L('Registration has no fee for international presenters who publish in the B-ICON Proceeding.', 'Registrasi tidak dipungut biaya bagi presenter internasional yang menerbitkan di B-ICON Proceeding.')) : esc(L('Registration is free for international presenters who choose B-ICON Proceeding above.', 'Registrasi gratis bagi presenter internasional yang memilih B-ICON Proceeding di atas.'))) + '</span>';
+}
 
 /* ---------- render ---------- */
 function renderStepper() {
@@ -1575,6 +1664,7 @@ function bindRegistrationForm() {
     if (el.type === 'radio') {
       REG.data[el.name] = el.value;
       if (el.name === 'category') { setErr('category', ''); renderStepper(); countryNote(); }
+      if (el.name === 'publication') intlFreeNote();
       setErr(el.name, '');
     }
     if (el.name === 'pkbAffiliated') { REG.data.pkbAffiliated = el.checked; if (el.checked && ['3', '4'].includes(String(REG.data.publication))) REG.data.publication = ''; }
@@ -1610,7 +1700,7 @@ async function submitRegistration(honey) {
     const payload = {
       category: d.category, fullNamePlain: d.fullNamePlain.trim(), fullNameCert: d.fullNameCert.trim(), email: d.email.trim().toLowerCase(), phone: d.phone.trim(),
       country: d.country, countryName: (countryList().find((c) => c.code === d.country) || {}).en || d.country, govId: (d.govId || '').trim(), affiliation: d.affiliation.trim(),
-      pkbAffiliated: !!d.pkbAffiliated, claimFree: d.category === 'presenter-intl' && !!d.claimFree, consent: true, website: honey, elapsed: Date.now() - REG.started
+      pkbAffiliated: !!d.pkbAffiliated, consent: true, website: honey, elapsed: Date.now() - REG.started
     };
     if (isPresenter(d.category)) {
       Object.assign(payload, { paperTitle: d.paperTitle.trim(), presentationMode: d.presentationMode, publication: Number(d.publication) });
@@ -1618,7 +1708,7 @@ async function submitRegistration(honey) {
       if (f) payload.file = { name: f.name, type: f.type || 'application/octet-stream', data: await fileToB64(f) };
     }
     const res = await gasPost('register', payload, { timeout: 120000 });
-    REG.done = { id: res.id, email: payload.email, presenter: isPresenter(d.category), name: payload.fullNameCert, emailSent: res.emailSent !== false };
+    REG.done = { id: res.id, email: payload.email, presenter: isPresenter(d.category), free: d.category === 'presenter-intl' && Number(d.publication) === 5, name: payload.fullNameCert, emailSent: res.emailSent !== false };
     store.del('regdraft'); store.set('lastreg', res.id);
     showSuccess();
   } catch (err) {
@@ -1638,7 +1728,7 @@ function showSuccess() {
     '<p style="color:var(--ink2);max-width:60ch;margin:8px auto 0">' + esc(r.emailSent ? L('A confirmation email is on its way to ', 'Email konfirmasi sedang dikirim ke ') : L('We could not send the confirmation email automatically. Please keep this ID and contact the secretariat. Address: ', 'Email konfirmasi tidak dapat dikirim otomatis. Simpan ID ini dan hubungi sekretariat. Alamat: ')) + '<b>' + esc(r.email) + '</b>. ' + esc(L('Keep your ID and email, you need both to check your status and upload documents.', 'Simpan ID dan email Anda, keduanya dibutuhkan untuk mengecek status dan mengunggah dokumen.')) + '</p>' +
     '<div class="next-grid">' +
     (r.presenter ? '<div class="card"><h4>' + esc(L('1. Submit in OJS', '1. Submit di OJS')) + '</h4><p>' + esc(L('Your registration is received. Now submit the same paper yourself to OJS B-ICON Proceeding, where the science committee does its review.', 'Registrasi Anda diterima. Sekarang submit sendiri naskah yang sama ke OJS B-ICON Proceeding, tempat komite ilmiah melakukan reviewnya.')) + '</p>' + ojsBtn(L('Open OJS', 'Buka OJS'), 'btn--outline btn--sm') + '</div>' : '<div class="card"><h4>' + esc(L('1. Check your email', '1. Periksa email Anda')) + '</h4><p>' + esc(L('Payment instructions are in the confirmation email.', 'Instruksi pembayaran ada di email konfirmasi.')) + '</p></div>') +
-    '<div class="card"><h4>' + esc(r.presenter ? L('2. Wait for acceptance', '2. Tunggu pemberitahuan') : L('2. Pay the fee', '2. Bayar biaya')) + '</h4><p>' + esc(r.presenter ? L('Acceptance is announced on 17 October 2026. You then pay by 19 October.', 'Penerimaan diumumkan 17 Oktober 2026. Setelah itu bayar paling lambat 19 Oktober.') : L('Then upload your proof of payment on My Registration.', 'Lalu unggah bukti pembayaran di Registrasi Saya.')) + '</p></div>' +
+    '<div class="card"><h4>' + esc(r.presenter ? L('2. Wait for acceptance', '2. Tunggu pemberitahuan') : L('2. Pay the fee', '2. Bayar biaya')) + '</h4><p>' + esc(r.free ? L('Acceptance is announced on 17 October 2026. Your registration fee is waived, nothing to pay.', 'Penerimaan diumumkan 17 Oktober 2026. Biaya registrasi Anda digratiskan, tidak ada yang perlu dibayar.') : r.presenter ? L('Acceptance is announced on 17 October 2026. You then pay by 19 October.', 'Penerimaan diumumkan 17 Oktober 2026. Setelah itu bayar paling lambat 19 Oktober.') : L('Then upload your proof of payment on My Registration.', 'Lalu unggah bukti pembayaran di Registrasi Saya.')) + '</p></div>' +
     '<div class="card"><h4>' + esc(L('3. Track your registration', '3. Pantau registrasi Anda')) + '</h4><p>' + esc(L('Check status, upload payment proof and, for posters, your poster.', 'Cek status, unggah bukti bayar dan, untuk poster, unggah poster Anda.')) + '</p>' + btn(L('My registration', 'Registrasi saya'), pageUrl('my-registration') + '?id=' + encodeURIComponent(r.id), 'btn--violet btn--sm', 'arrow') + '</div></div></div>';
   window.scrollTo({ top: $('#register').getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
 }
@@ -1679,6 +1769,7 @@ PAGES.registration = function () {
   ${pageHero({ title: L('Register for B-ICON 2026', 'Registrasi B-ICON 2026'), lead: L('Present a paper or join as a participant. The whole process takes about five minutes.', 'Presentasikan makalah atau bergabung sebagai peserta. Prosesnya sekitar lima menit.'), parent: [L('Registration', 'Registrasi'), pageUrl('registration')], actions: `<a class="btn btn--primary" href="#register">${esc(L('Start registration', 'Mulai registrasi'))} ${icon('arrow')}</a>${btn(L('My registration', 'Registrasi saya'), pageUrl('my-registration'), 'btn--ghost', 'user')}` })}
   <section class="section section--tight">
     <div class="wrap">
+      ${regStatusNotice()}
       <div class="steps" style="margin-top:18px">
         <div class="step rv"><h4>${esc(L('Choose a category', 'Pilih kategori'))}</h4><p>${esc(L('Presenter (oral or poster) or participant (online or onsite).', 'Presenter (oral atau poster) atau peserta (daring atau luring).'))}</p></div>
         <div class="step rv" data-d="1"><h4>${esc(L('Fill in your details', 'Isi data Anda'))}</h4><p>${esc(L('Personal details and, for presenters, your paper information.', 'Data diri dan, untuk presenter, informasi naskah.'))}</p></div>
@@ -1751,7 +1842,7 @@ function myRegHtml(r) {
   if (pres && r.presentationMode === 'poster') {
     const ps2 = statusKey(r.posterStatus || 'none');
     posterBox = '<div class="card" style="margin-top:18px"><h4 style="font-size:19px;margin-bottom:6px">' + esc(L('Poster', 'Poster')) + ' ' + pill(ps2 === 'published' ? 'paid' : ps2 === 'pending' ? 'review' : 'pending', lab[ps2] || r.posterStatus || lab.none) + '</h4>' +
-      (canPoster ? '<p style="color:var(--ink2)">' + esc(L('Upload your camera-ready poster (JPG, PNG or PDF). After the committee approves it, it appears in the virtual poster exhibition.', 'Unggah poster final Anda (JPG, PNG, atau PDF). Setelah disetujui panitia, poster tampil di pameran poster virtual.')) + '</p>' + posterFormHtml(r) : '<p style="color:var(--ink2);margin:0">' + esc(st === 'accepted' ? L('Poster upload is available for accepted poster presenters.', 'Unggah poster tersedia bagi presenter poster yang diterima.') : L('Poster upload opens after your paper is accepted (17 October 2026).', 'Unggah poster dibuka setelah naskah Anda diterima (17 Oktober 2026).')) + '</p>') + '</div>';
+      (canPoster ? '<p style="color:var(--ink2)">' + esc(L('Upload your camera-ready poster (JPG, PNG or PDF). After the committee approves it, it appears in the virtual poster exhibition.', 'Unggah poster final Anda (JPG, PNG, atau PDF). Setelah disetujui panitia, poster tampil di pameran poster virtual.')) + ' <a href="' + FILE('B-ICON2026-Poster-Template-A1.pptx') + '" target="_blank" rel="noopener">' + icon('download') + ' ' + esc(L('Download the A1 template', 'Unduh template A1')) + '</a></p>' + posterFormHtml(r) : '<p style="color:var(--ink2);margin:0">' + esc(st === 'accepted' ? L('Poster upload is available for accepted poster presenters.', 'Unggah poster tersedia bagi presenter poster yang diterima.') : L('Poster upload opens after your paper is accepted (17 October 2026).', 'Unggah poster dibuka setelah naskah Anda diterima (17 Oktober 2026).')) + '</p>') + '</div>';
   }
   const STATUS_EXPLAIN = { received: L('Received means the committee has received your article and it is waiting to be reviewed.', 'Diterima berarti artikel Anda telah diterima panitia dan menunggu untuk direview.'), review: L('Under review means the science committee and its reviewers are currently assessing your article.', 'Sedang direview berarti komite ilmiah dan reviewer sedang menilai artikel Anda.'), accepted: L('Accepted means your article has been approved for presentation at the conference.', 'Diterima (accepted) berarti artikel Anda disetujui untuk dipresentasikan di konferensi.'), revision: L('Revision requested means the committee needs changes to your article before it can be accepted.', 'Perlu revisi berarti panitia meminta perbaikan pada artikel Anda sebelum dapat diterima.'), rejected: L('Not accepted means your article was not approved to be presented as a paper at this conference.', 'Tidak diterima berarti artikel Anda tidak disetujui untuk dipresentasikan sebagai naskah di konferensi ini.') }[st];
   return '<div class="form-card"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:6px"><h3 style="margin:0;margin-right:auto">' + esc(L('Your registration', 'Registrasi Anda')) + '</h3>' +
@@ -2079,7 +2170,7 @@ onModalClosed = function () { if (location.hash.indexOf('#poster=') === 0) { try
 PAGES['poster-exhibition'] = function () {
   const main = html`
   ${CFG.features.demo ? '<div class="demo-flag">' + esc(L('Design preview: the posters below are samples', 'Pratinjau desain: poster di bawah ini hanyalah contoh')) + '</div>' : ''}
-  ${pageHero({ title: L('Virtual poster exhibition', 'Pameran poster virtual'), lead: L('Browse accepted scientific posters from B-ICON 2026. Search by keyword, filter by track, read the abstract and show your appreciation to the authors.', 'Jelajahi poster ilmiah B-ICON 2026 yang diterima. Cari dengan kata kunci, saring per bidang, baca abstrak, dan berikan apresiasi kepada penulis.'), parent: [L('Poster exhibition', 'Pameran poster'), pageUrl('poster-exhibition')], actions: btn(L('Present a poster', 'Presentasikan poster'), pageUrl('registration'), 'btn--primary') + btn(L('Upload my poster', 'Unggah poster saya'), pageUrl('my-registration'), 'btn--ghost', 'upload') })}
+  ${pageHero({ title: L('Virtual poster exhibition', 'Pameran poster virtual'), lead: L('Browse accepted scientific posters from B-ICON 2026. Search by keyword, filter by track, read the abstract and show your appreciation to the authors.', 'Jelajahi poster ilmiah B-ICON 2026 yang diterima. Cari dengan kata kunci, saring per bidang, baca abstrak, dan berikan apresiasi kepada penulis.'), parent: [L('Poster exhibition', 'Pameran poster'), pageUrl('poster-exhibition')], actions: btn(L('Present a poster', 'Presentasikan poster'), pageUrl('registration'), 'btn--primary') + btn(L('Upload my poster', 'Unggah poster saya'), pageUrl('my-registration'), 'btn--ghost', 'upload') + btn(L('Download poster template', 'Unduh template poster'), FILE('B-ICON2026-Poster-Template-A1.pptx'), 'btn--outline', 'download', true) })}
   <section class="expo">
     <div class="expo__bar">
       <div class="wrap">
@@ -2098,7 +2189,7 @@ PAGES['poster-exhibition'] = function () {
     ${secHead(L('For presenters', 'Untuk presenter'), L('How your poster gets here', 'Bagaimana poster Anda tampil di sini'))}
     <div class="steps">
       <div class="step rv"><h4>${esc(L('Get accepted', 'Diterima'))}</h4><p>${esc(L('Register as a poster presenter and submit your paper. Acceptance is announced on 17 October 2026.', 'Daftar sebagai presenter poster dan kirim naskah. Penerimaan diumumkan 17 Oktober 2026.'))}</p></div>
-      <div class="step rv" data-d="1"><h4>${esc(L('Upload your poster', 'Unggah poster'))}</h4><p>${esc(L('Use My Registration to upload a JPG, PNG or PDF, plus an optional video link.', 'Gunakan Registrasi Saya untuk mengunggah JPG, PNG, atau PDF, serta tautan video opsional.'))}</p></div>
+      <div class="step rv" data-d="1"><h4>${esc(L('Upload your poster', 'Unggah poster'))}</h4><p>${esc(L('Prepare your poster using the A1 template, then use My Registration to upload a JPG, PNG or PDF, plus an optional video link.', 'Siapkan poster Anda memakai template A1, lalu gunakan Registrasi Saya untuk mengunggah JPG, PNG, atau PDF, serta tautan video opsional.'))} <a href="${FILE('B-ICON2026-Poster-Template-A1.pptx')}" target="_blank" rel="noopener">${icon('download')} ${esc(L('Download template', 'Unduh template'))}</a></p></div>
       <div class="step rv" data-d="2"><h4>${esc(L('Committee review', 'Ditinjau panitia'))}</h4><p>${esc(L('The committee checks the file and publishes it. You get an email when it is live.', 'Panitia memeriksa berkas lalu menerbitkannya. Anda mendapat email saat poster tayang.'))}</p></div>
       <div class="step rv" data-d="3"><h4>${esc(L('Share it', 'Bagikan'))}</h4><p>${esc(L('Every poster has its own link you can send to colleagues and reviewers.', 'Setiap poster memiliki tautan sendiri yang bisa Anda kirim ke kolega dan reviewer.'))}</p></div>
     </div>
@@ -2168,7 +2259,7 @@ async function loadOverrides() {
   } catch (e) { /* ignore */ }
   try {
     const r = await Promise.race([gasGet('content', null, { timeout: 4000 }), new Promise((_, rej) => setTimeout(() => rej(new Error('slow')), 1800))]);
-    const v = { dates: r.dates || {}, announcements: r.announcements || [] };
+    const v = { dates: r.dates || {}, announcements: r.announcements || [], regStatus: r.regStatus || null };
     window.__BICON_OVERRIDES = v;
     try { sessionStorage.setItem(KEY, JSON.stringify({ t: Date.now(), v })); } catch (e) { /* ignore */ }
   } catch (e) { /* the built-in defaults are always good enough */ }

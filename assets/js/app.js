@@ -26,7 +26,7 @@ const CFG = (function () {
       demo: false,              // ?demo=1 shows sample posters (for previews only)
       whatsappFloat: true
     },
-    limits: { abstractWords: 300, manuscriptMB: 5, proofMB: 3, posterMB: 8 },
+    limits: { abstractWords: 300, manuscriptMB: 5, proofMB: 6, posterMB: 8 },
     ga: ''
   };
   const u = window.BICON_CONFIG || {};
